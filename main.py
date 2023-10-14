@@ -43,6 +43,16 @@ def showCredit(creditor):
     data=cursor.fetchall()
     return data
 
+def arrangeList(lists:list):
+    newLists=[]
+    for list in lists:
+        l=list(list)
+        del l[2]
+        newLists.append(l)
+        
+    
+    
+    
 @client.event
 async def on_ready():
     print('We have logged in as {0.user}'.format(client))
