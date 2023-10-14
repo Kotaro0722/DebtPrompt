@@ -37,7 +37,7 @@ def showDebt(debtor):
 def showCredit(creditor):
     connect=sqlite3.connectect(dbName)
     cursor=connect.cursorsor()
-    select="SELECT creditor,amount,detail,isRepay FROM debt WHERE debtor=(:creditor)"
+    select="SELECT creditor,amount,detail,isRepay FROM debt WHERE creditor=(:creditor)"
     selectList={"creditor":creditor}
     cursor.execute(select,selectList)
     data=cursor.fetchall()
