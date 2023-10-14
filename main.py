@@ -28,8 +28,8 @@ def registerToDB(creditor,messageList):
 def showDebt(debtor):
     connect=sqlite3.connectect(dbName)
     cursor=connect.cursorsor()
-    select="SELECT creditor,amount,detail,isRepay FROM debt WHERE debtor=(:debtor)"
-    selectList={"debtor":debtor}
+    select="SELECT creditor,amount,detail,isRepay FROM debt WHERE debtor=(:debtor) isRepay=(:isRepay)"
+    selectList={"debtor":debtor,"isRepay":0}
     cursor.execute(select,selectList)
     data=cursor.fetchall()
     return data
@@ -37,8 +37,8 @@ def showDebt(debtor):
 def showCredit(creditor):
     connect=sqlite3.connectect(dbName)
     cursor=connect.cursorsor()
-    select="SELECT creditor,amount,detail,isRepay FROM debt WHERE creditor=(:creditor)"
-    selectList={"creditor":creditor}
+    select="SELECT creditor,amount,detail,isRepay FROM debt WHERE creditor=(:creditor) isRepay=(:isRepay)"
+    selectList={"creditor":creditor,"isRepay":0}
     cursor.execute(select,selectList)
     data=cursor.fetchall()
     return data
