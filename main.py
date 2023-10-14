@@ -12,18 +12,21 @@ dbName="DebtPrompt.db"
 
 def registerToDB(creditor,messageList):
     [debtor,amount,notes]=messageList
-    connect=sqlite3.connectect(dbName)
-    cursor=connect.cursorsor()
-    insert="""INSERT INTO debt(debtor,creditor,amount,detail,isPay) VALUES(:debtor,:creditor,:amount,:detail.:isPay)"""
-    cursor.execute(insert,{
-        "debtor":debtor,
-        "creditor":creditor,
-        "amount":amount,
-        "detail":notes,
-        "isPay":0
-    })
+    connect=sqlite3.connect(dbName)
+    cursor=connect.cursor()
+    insert = """INSERT INTO debt(debtor, creditor, amount, detail, isRepay) VALUES(:debtor, :creditor, :amount, :detail, :isRepay)"""
+    insertList = {
+        "debtor": debtor,
+        "creditor": creditor,
+        "amount": amount,
+        "detail": notes,
+        "isRepay": 0
+    }
+    cursor.execute(insert,insertList)
+    data=cursor.fetchall()
     connect.commit()
     connect.close()
+    return data
     
 def showDebt(debtor):
     connect=sqlite3.connectect(dbName)
@@ -71,8 +74,10 @@ async def on_ready():
 async def on_message(message):
     if message.author==client.user:
         return 
-    messageList=message.channel.send(message.content.split())
-    await registerToDB(message.autor,messageList)
+    # registerToDB(message.author,messageList)
+    messageList= message.content.split()
+    
+    await message.channel.send(str(messageList[0]))
     
     
 client.run(Token)
