@@ -49,6 +49,7 @@ def arrangeList(lists:list):
         l=list(list)
         del l[2]
         newLists.append(l)
+    return newLists
         
 def splitList(lists:list,members:list):
     returnObject={}
