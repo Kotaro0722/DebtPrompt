@@ -50,7 +50,15 @@ def arrangeList(lists:list):
         del l[2]
         newLists.append(l)
         
-    
+def splitList(lists:list,members:list):
+    returnObject={}
+    for list in lists:
+        counter=0
+        for member in members:
+            if member==list[0]:
+                counter+=list[1]
+        returnObject[member]=counter
+    return returnObject            
     
     
 @client.event
