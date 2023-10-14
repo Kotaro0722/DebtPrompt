@@ -34,10 +34,14 @@ def showDebt(debtor):
     data=cursor.fetchall()
     return data
     
-    
-
 def showCredit(creditor):
-    pass
+    connect=sqlite3.connectect(dbName)
+    cursor=connect.cursorsor()
+    select="SELECT creditor,amount,detail,isRepay FROM debt WHERE debtor=(:creditor)"
+    selectList={"creditor":creditor}
+    cursor.execute(select,selectList)
+    data=cursor.fetchall()
+    return data
 
 @client.event
 async def on_ready():
