@@ -8,19 +8,36 @@ intents.message_content = True
 # intents.guilds = True
 client = discord.Client(intents=intents)
 
-dbName="debt.db"
+dbName="DebtPrompt.db"
 
-def useDB(creditor,messageList):
+def registerToDB(creditor,messageList):
     [debtor,amount,notes]=messageList
-    conn=sqlite3.connect(dbName)
-    cur=conn.cursor()
-    cur.execute("create table debtPrompt(creditor STRING,debtor STRING,amount INTEGER,notes STRING)")
-    cur.execute("insert into debtPrompt(creditor) values("+creditor+")")
-    cur.execute("insert into debtPrompt(debtor) values("+debtor+")")
-    cur.execute("insert into debtPrompt(amount) values("+amount+")")
-    cur.execute("insert into debtPrompt(notes) values("+notes+")")
-    conn.commit()
-    conn.close()
+    connect=sqlite3.connectect(dbName)
+    cursor=connect.cursorsor()
+    insert="""INSERT INTO debt(debtor,creditor,amount,detail,isPay) VALUES(:debtor,:creditor,:amount,:detail.:isPay)"""
+    cursor.execute(insert,{
+        "debtor":debtor,
+        "creditor":creditor,
+        "amount":amount,
+        "detail":notes,
+        "isPay":0
+    })
+    connect.commit()
+    connect.close()
+    
+def showDebt(debtor):
+    connect=sqlite3.connectect(dbName)
+    cursor=connect.cursorsor()
+    select="SELECT creditor,amount,detail,isRepay FROM debt WHERE debtor=(:debtor)"
+    selectList={"debtor":debtor}
+    cursor.execute(select,selectList)
+    data=cursor.fetchall()
+    return data
+    
+    
+
+def showCredit(creditor):
+    pass
 
 @client.event
 async def on_ready():
@@ -32,7 +49,7 @@ async def on_message(message):
     if message.author==client.user:
         return 
     messageList=message.channel.send(message.content.split())
-    await useDB(message.autor,messageList)
+    await registerToDB(message.autor,messageList)
     
     
 client.run(Token)
