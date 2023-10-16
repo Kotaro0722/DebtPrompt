@@ -8,12 +8,14 @@ intents.message_content = True
 # intents.guilds = True
 client = discord.Client(intents=intents)
 
-dbName="DebtPrompt.db"
+dbName = "DebtPrompt.db"
 
-def registerToDB(creditor,messageList):
-    [debtor,amount,notes]=messageList
-    connect=sqlite3.connect(dbName)
-    cursor=connect.cursor()
+
+def registerToDB(creditor, messageList):
+    [debtor, amount, notes] = messageList
+    debtor[1:]
+    connect = sqlite3.connect(dbName)
+    cursor = connect.cursor()
     insert = """INSERT INTO debt(debtor, creditor, amount, detail, isRepay) VALUES(:debtor, :creditor, :amount, :detail, :isRepay)"""
     insertList = {
         "debtor": debtor,
@@ -22,49 +24,53 @@ def registerToDB(creditor,messageList):
         "detail": notes,
         "isRepay": 0
     }
-    cursor.execute(insert,insertList)
-    data=cursor.fetchall()
+    cursor.execute(insert, insertList)
+    data = cursor.fetchall()
     connect.commit()
     connect.close()
     return data
-    
+
+
 def showDebt(debtor):
-    connect=sqlite3.connectect(dbName)
-    cursor=connect.cursorsor()
-    select="SELECT creditor,amount,detail,isRepay FROM debt WHERE debtor=(:debtor) isRepay=(:isRepay)"
-    selectList={"debtor":debtor,"isRepay":0}
-    cursor.execute(select,selectList)
-    data=cursor.fetchall()
-    return data
-    
-def showCredit(creditor):
-    connect=sqlite3.connectect(dbName)
-    cursor=connect.cursorsor()
-    select="SELECT creditor,amount,detail,isRepay FROM debt WHERE creditor=(:creditor) isRepay=(:isRepay)"
-    selectList={"creditor":creditor,"isRepay":0}
-    cursor.execute(select,selectList)
-    data=cursor.fetchall()
+    connect = sqlite3.connectect(dbName)
+    cursor = connect.cursorsor()
+    select = "SELECT creditor,amount,detail,isRepay FROM debt WHERE debtor=(:debtor) isRepay=(:isRepay)"
+    selectList = {"debtor": debtor, "isRepay": 0}
+    cursor.execute(select, selectList)
+    data = cursor.fetchall()
     return data
 
-def arrangeList(lists:list):
-    newLists=[]
+
+def showCredit(creditor):
+    connect = sqlite3.connectect(dbName)
+    cursor = connect.cursorsor()
+    select = "SELECT creditor,amount,detail,isRepay FROM debt WHERE creditor=(:creditor) isRepay=(:isRepay)"
+    selectList = {"creditor": creditor, "isRepay": 0}
+    cursor.execute(select, selectList)
+    data = cursor.fetchall()
+    return data
+
+
+def arrangeList(lists: list):
+    newLists = []
     for list in lists:
-        l=list(list)
+        l = list(list)
         del l[2]
         newLists.append(l)
     return newLists
-        
-def splitList(lists:list,members:list):
-    returnObject={}
+
+
+def splitList(lists: list, members: list):
+    returnObject = {}
     for list in lists:
-        counter=0
+        counter = 0
         for member in members:
-            if member==list[0]:
-                counter+=list[1]
-        returnObject[member]=counter
-    return returnObject            
-    
-    
+            if member == list[0]:
+                counter += list[1]
+        returnObject[member] = counter
+    return returnObject
+
+
 @client.event
 async def on_ready():
     print('We have logged in as {0.user}'.format(client))
@@ -72,12 +78,14 @@ async def on_ready():
 
 @client.event
 async def on_message(message):
-    if message.author==client.user:
-        return 
+    if message.author == client.user:
+        return
     # registerToDB(message.author,messageList)
-    messageList= message.content.split()
-    
-    await message.channel.send(str(messageList[0]))
-    
-    
+    messageList = message.content.split()
+
+    # registerToDB(message.author.name, messageList)
+    await message.channel.send(type(messageList[0].lstript("@")))
+    # await message.channel.send(messageList[0][1:])
+
+
 client.run(Token)
