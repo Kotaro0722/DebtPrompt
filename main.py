@@ -71,6 +71,14 @@ def splitList(lists: list, members: list):
     return returnObject
 
 
+def searchCheck(message: discord.Message):
+    checker = False
+    for phrase in message.content:
+        if phrase == "!":
+            checker = True
+    return checker
+
+
 @client.event
 async def on_ready():
     print('We have logged in as {0.user}'.format(client))
@@ -84,8 +92,13 @@ async def on_message(message):
     messageList = message.content.split()
 
     debtor = message.mentions[0].name
-    registerToDB(message.author.name, debtor,
-                 messageList[1], messageList[2], message.id)
+    # registerToDB(message.author.name, debtor,
+    #              messageList[1], messageList[2], message.id)
+
+    for mention in message.mentions:
+        if mention.name == "借金催促":
+            if searchCheck(message):
+                showDebt(message.mentions[1].name)
 
 
 client.run(Token)
