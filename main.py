@@ -1,5 +1,6 @@
 import discord
 import sqlite3
+import re
 
 Token = "MTA5NTI1MjQ0ODYwMTQ1NjY3Mg.GjaVkI.k8OJ16DqLE1SxwHSoCiXrz20oVF5agg3JtzfOY"
 intents = discord.Intents.default()
@@ -11,13 +12,12 @@ client = discord.Client(intents=intents)
 dbName = "DebtPrompt.db"
 
 
-def registerToDB(creditor, messageList):
-    [debtor, amount, notes] = messageList
-    debtor[1:]
+def registerToDB(creditor, debtor, amount, notes, id):
     connect = sqlite3.connect(dbName)
     cursor = connect.cursor()
-    insert = """INSERT INTO debt(debtor, creditor, amount, detail, isRepay) VALUES(:debtor, :creditor, :amount, :detail, :isRepay)"""
+    insert = """INSERT INTO debt(id,debtor, creditor, amount, detail, isRepay) VALUES(:id,:debtor, :creditor, :amount, :detail, :isRepay)"""
     insertList = {
+        "id": id,
         "debtor": debtor,
         "creditor": creditor,
         "amount": amount,
@@ -71,14 +71,6 @@ def splitList(lists: list, members: list):
     return returnObject
 
 
-def getCreditor(message: discord.Message):
-    guild = client.get_guild(message.guild.id)
-    messageList = message.content.split()
-    creditorID = messageList[0][3:len(messageList[0])-1]
-    userNickname = guild.get_member(1095253731102179352)
-    return guild
-
-
 @client.event
 async def on_ready():
     print('We have logged in as {0.user}'.format(client))
@@ -89,9 +81,11 @@ async def on_message(message):
     if message.author == client.user:
         return
 
-    # registerToDB(message.author.name, messageList)
-    debtor = getCreditor(message)
-    await message.channel.send(debtor)
+    messageList = message.content.split()
+
+    debtor = message.mentions[0].name
+    registerToDB(message.author.name, debtor,
+                 messageList[1], messageList[2], message.id)
 
 
 client.run(Token)
