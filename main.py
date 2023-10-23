@@ -71,6 +71,14 @@ def splitList(lists: list, members: list):
     return returnObject
 
 
+def getCreditor(message: discord.Message):
+    guild = client.get_guild(message.guild.id)
+    messageList = message.content.split()
+    creditorID = messageList[0][3:len(messageList[0])-1]
+    userNickname = guild.get_member(1095253731102179352)
+    return guild
+
+
 @client.event
 async def on_ready():
     print('We have logged in as {0.user}'.format(client))
@@ -80,12 +88,10 @@ async def on_ready():
 async def on_message(message):
     if message.author == client.user:
         return
-    # registerToDB(message.author,messageList)
-    messageList = message.content.split()
 
     # registerToDB(message.author.name, messageList)
-    await message.channel.send(type(messageList[0].lstript("@")))
-    # await message.channel.send(messageList[0][1:])
+    debtor = getCreditor(message)
+    await message.channel.send(debtor)
 
 
 client.run(Token)
