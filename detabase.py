@@ -26,8 +26,8 @@ insertList = {
     "isRepay": 0
 }
 
-select = "SELECT creditor,amount,detail,isRepay FROM debt WHERE creditor=(:creditor)"
-selectList = {"creditor": "tanami"}
+select = "SELECT creditor,amount,detail FROM debt WHERE amount=(:amount) AND creditor=(:creditor) "
+selectList = {"amount":400,"creditor": "tanami"}
 
 update = "UPDATE debt SET creditor='tanami' WHERE id=7"
 
