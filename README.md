@@ -32,20 +32,20 @@
 　 ● 債務者からの検索
 　　　・ユーザがユーザ用仕様通りに入力する。
 　　　・メンションに反応し、以下の処理を実行する。
-　　　　・メッセージを分割する。
-　　　　・関数 showDebt()を呼び出し、引数 debtor に分割されたメッセージの二番目を与える。
-　　　　・showDebt()の結果を関数 arrangeDebt()の引数に与える。
-　　　　・arrangeDebt()の結果を 関数 splitDebt()の引数に与える。
-　　　　・splitCredit の結果をそれぞれ改行しながら表示する。
+　　　　 1.メッセージを分割する。
+　　　　 2.関数 showDebt()を呼び出し、引数 debtor に分割されたメッセージの二番目を与える。
+　　　　 3.showDebt()の結果を関数 arrangeList()の引数に与える。
+　　　　 4.arrangeDebt()の結果を 関数 splitList()の引数に与える。
+　　　　 5.splitCredit の結果をそれぞれ改行しながら表示する。
 　　　・詳細を表示させる場合、関数 showDebt()の結果を表示する。
 　 ● 債務者からの検索
 　　　・ユーザがユーザ用仕様通りに入力する。
 　　　・メンションに反応し、以下の処理を実行する。
-　　　　・メッセージを分割する。
-　　　　・関数 showCredit()を呼び出し、引数 creditor に分割されたメッセージの二番目を与える。
-　　　　・showCredit()の結果を関数 arrangeCredit()の引数に与える。
-　　　　・arrangeCredit()の結果を 関数 splitCredit()の引数に与える。
-　　　　・splitCredit の結果をそれぞれ改行しながら表示する。
+　　　　 1.メッセージを分割する。
+　　　　 2.関数 showCredit()を呼び出し、引数 creditor に分割されたメッセージの二番目を与える。
+　　　　 3.showCredit()の結果を関数 arrangeList()の引数に与える。
+　　　　 4.arrangeCredit()の結果を 関数 splitList()の引数に与える。
+　　　　 5.splitCredit の結果をそれぞれ改行しながら表示する。
 　　　・詳細を表示させる場合、関数 showCredit()の結果を表示する。
 
 ３．借金の返済
