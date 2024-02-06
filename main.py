@@ -121,9 +121,7 @@ async def on_message(message):
             member = await getMember(message)
             await showHistory(searchCheck(message), message.mentions[1].name, message, member)
         else:
-            messageList = message.content.split()
-
-            debtor = message.mentions[0].name
+            
             # registerToDB(message.author.name, debtor,
             #              messageList[1], messageList[2], message.id)
 
