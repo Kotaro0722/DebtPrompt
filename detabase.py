@@ -4,37 +4,37 @@ dbname = 'DebtPrompt.db'
 conn = sqlite3.connect(dbname)
 cur = conn.cursor()
 
-createTable="""CREATE TABLE IF NOT EXISTS debt
+createTable = """CREATE TABLE IF NOT EXISTS debt
     (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        id INTEGER,
         debtor TEXT,
         creditor TEXT,
         amount INTEGER,
         detail TEXT
     )
     """
-addColumn="ALTER TABLE debt ADD COLUMN isRepay INTEGER"
+addColumn = "ALTER TABLE debt ADD COLUMN isRepay INTEGER"
 
-deleteTable="""DROP TABLE debt"""
+deleteTable = """DROP TABLE debt"""
 
-insert="""INSERT INTO debt(debtor,creditor,amount,detail,isRepay) VALUES(:debtor,:creditor,:amount,:detail,:isRepay)"""
-insertList={
-    "debtor":"kotaro",
-    "creditor":"tomohisa",
-    "amount":400,
-    "detail":"昼飯",
-    "isRepay":0
+insert = """INSERT INTO debt(debtor,creditor,amount,detail,isRepay) VALUES(:debtor,:creditor,:amount,:detail,:isRepay)"""
+insertList = {
+    "debtor": "kotaro",
+    "creditor": "tomohisa",
+    "amount": 400,
+    "detail": "昼飯",
+    "isRepay": 0
 }
-    
-select="SELECT creditor,amount,detail,isRepay FROM debt WHERE creditor=(:creditor)"
-selectList={"creditor":"tanami"}
 
-update="UPDATE debt SET creditor='tanami' WHERE id=7"
+select = "SELECT creditor,amount,detail FROM debt WHERE amount=(:amount) AND creditor=(:creditor) "
+selectList = {"amount":400,"creditor": "tanami"}
 
-delete ="DELETE FROM debt"
+update = "UPDATE debt SET creditor='tanami' WHERE id=7"
 
-cur.execute(select,selectList)
-data=cur.fetchall()
+delete = "DELETE FROM debt"
+
+cur.execute(select, selectList)
+data = cur.fetchall()
 print(data)
 conn.commit()
 cur.close()
