@@ -5,8 +5,8 @@ import re
 Token = "MTA5NTI1MjQ0ODYwMTQ1NjY3Mg.GjaVkI.k8OJ16DqLE1SxwHSoCiXrz20oVF5agg3JtzfOY"
 intents = discord.Intents.default()
 intents.message_content = True
-intents.members=True
-intents.typing=False
+intents.members = True
+intents.typing = False
 # intents.reactions = True
 # intents.guilds = True
 client = discord.Client(intents=intents)
@@ -32,6 +32,7 @@ def registerToDB(creditor, debtor, amount, notes, id):
     connect.close()
     return data
 
+
 def showDebt(debtor):
     connect = sqlite3.connect(dbName)
     cursor = connect.cursor()
@@ -40,6 +41,7 @@ def showDebt(debtor):
     cursor.execute(select, selectList)
     data = cursor.fetchall()
     return data
+
 
 def showCredit(creditor):
     connect = sqlite3.connect(dbName)
@@ -50,12 +52,14 @@ def showCredit(creditor):
     data = cursor.fetchall()
     return data
 
+
 def arrangeList(lists: list):
     newLists = []
     for list in lists:
         l = list[0:2:1]
         newLists.append(l)
     return newLists
+
 
 def splitList(lists: list, members):
     returnObject = {}
@@ -67,32 +71,40 @@ def splitList(lists: list, members):
         returnObject[member] = counter
     return returnObject
 
-def searchCheck(message: discord.Message):
-    checker = False
-    for phrase in message.content:
-        if phrase == "!":
-            checker = True
-    return checker
 
-async def showHistory(isDebtor:bool,person,message,member):
-    data=0
+def searchCheck(message: discord.Message):
+    pattern = "!"
+    repattern = re.compile(pattern)
+    result = repattern.match(message)
+    return result
+    # checker = False
+    # for phrase in message.content:
+    #     if phrase == "!":
+    #         checker = True
+    # return checker
+
+
+async def showHistory(isDebtor: bool, person, message, member):
+    data = 0
     if isDebtor:
-        data=showDebt(message.mentions[1].name)
+        data = showDebt(message.mentions[1].name)
     else:
-        data= showCredit(message.mentions[1].name)
-    arrangeData=arrangeList(data)
-    splitData=splitList(arrangeData,member)
+        data = showCredit(message.mentions[1].name)
+    arrangeData = arrangeList(data)
+    splitData = splitList(arrangeData, member)
     await message.channel.send(splitData)
     # for datum in splitData:
     #     await message.channel.send(splitData[datum])
 
+
 async def getMember(message):
     guild = client.get_guild(message.guild.id)
-    members=guild._members
-    memberList=[]
+    members = guild._members
+    memberList = []
     for member in members:
         memberList.append(member)
     return memberList
+
 
 @client.event
 async def on_ready():
@@ -106,8 +118,8 @@ async def on_message(message):
 
     for mention in message.mentions:
         if mention.name == "借金催促":
-            member= await getMember(message)
-            await showHistory(searchCheck(message),message.mentions[1].name,message,member)
+            member = await getMember(message)
+            await showHistory(searchCheck(message), message.mentions[1].name, message, member)
         else:
             messageList = message.content.split()
 
