@@ -107,13 +107,18 @@ async def getMember(message):
     return memberList
 
 
-async def getPatternIsRegister(message):
+async def getDebtor(message):
     list_party = await getMember(message)
-    # print(type(list_party))
-    pattern = "("
+    pattern = ""
     for id in list_party:
         pattern += f"<@{id}> | "
-    pattern += ") [0-9]+円"
+    pattern = pattern.rstrip().rstrip("|").rstrip()
+    return pattern
+
+
+async def getPatternIsRegister(message):
+    pattern = await getDebtor(message)
+    pattern += "[\s]*[0-9]+円"
     return pattern
 
 
@@ -129,22 +134,29 @@ async def on_message(message):
 
     message_content = message.content
     pattern_is_summon = "<@1095252448601456672>"
-    pattern_is_register = await getPatternIsRegister(message)
     is_summon = re.match(pattern_is_summon, message_content)
-    is_register = re.match(pattern_is_register, message_content)
-
     if is_summon:
-        pattern_get_debtor = "<@[0-9]+>"
-        get_debtor = re.findall(pattern_get_debtor, message_content)
+        debtor = message_content.replace(pattern_is_summon+" ", "", 1)
+        pattern_is_debtor = await getDebtor(message)
+        is_debtor = re.fullmatch(pattern_is_debtor, debtor)
 
-        if len(get_debtor) > 2:
+        is_all_debt = re.fullmatch(pattern_is_summon, message_content)
+
+        if is_all_debt:
+            await message.channel.send("すべての債権を表示します。")
+
+        elif not is_debtor:
             await message.channel.send("不正な入力です")
             return
+        else:
+            await message.channel.send("～～さんへの債権を表示します。")
 
-        await message.channel.send("呼び出しに成功")
-        debtor_and_detail = message_content.split()
-        del debtor_and_detail[0]
+    pattern_is_register = await getPatternIsRegister(message)
+    is_register = re.match(pattern_is_register, message_content)
     if is_register:
         await message.channel.send("登録できました")
+# @client.event
+# async def on_reaction_add(reaction, user):
+#     print("リアクションが付与されました。")
 
 client.run(Token)
