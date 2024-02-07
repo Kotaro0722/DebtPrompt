@@ -116,13 +116,22 @@ async def on_message(message):
     if message.author == client.user:
         return
 
-    for mention in message.mentions:
-        if mention.name == "借金催促":
-            member = await getMember(message)
-            await showHistory(searchCheck(message), message.mentions[1].name, message, member)
-        else:
-            
-            # registerToDB(message.author.name, debtor,
-            #              messageList[1], messageList[2], message.id)
+    message_content = message.content
+    pattern_is_summon = "<@1095252448601456672>"
+    is_summon = re.match(pattern_is_summon, message_content)
+
+    if is_summon:
+        pattern_get_debtor = "<@[0-9]+>"
+        get_debtor = re.findall(pattern_get_debtor, message_content)
+
+        if len(get_debtor) > 2:
+            await message.channel.send("不正な入力です")
+            return
+
+        await message.channel.send("呼び出しに成功")
+        debtor_and_detail = message_content.split()
+        del debtor_and_detail[0]
+        await message.channel.send(debtor_and_detail)
+
 
 client.run(Token)
