@@ -101,9 +101,20 @@ async def getMember(message):
     guild = client.get_guild(message.guild.id)
     members = guild._members
     memberList = []
-    for member in members:
-        memberList.append(member)
+    for member in members.values():
+        if not member.bot:
+            memberList.append(member.id)
     return memberList
+
+
+async def getPatternIsRegister(message):
+    list_party = await getMember(message)
+    # print(type(list_party))
+    pattern = "("
+    for id in list_party:
+        pattern += f"<@{id}> | "
+    pattern += ") [0-9]+円"
+    return pattern
 
 
 @client.event
@@ -118,7 +129,9 @@ async def on_message(message):
 
     message_content = message.content
     pattern_is_summon = "<@1095252448601456672>"
+    pattern_is_register = await getPatternIsRegister(message)
     is_summon = re.match(pattern_is_summon, message_content)
+    is_register = re.match(pattern_is_register, message_content)
 
     if is_summon:
         pattern_get_debtor = "<@[0-9]+>"
@@ -131,7 +144,7 @@ async def on_message(message):
         await message.channel.send("呼び出しに成功")
         debtor_and_detail = message_content.split()
         del debtor_and_detail[0]
-        await message.channel.send(debtor_and_detail)
-
+    if is_register:
+        await message.channel.send("登録できました")
 
 client.run(Token)
