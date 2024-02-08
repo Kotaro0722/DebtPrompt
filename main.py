@@ -3,12 +3,14 @@ import sqlite3
 import re
 
 Token = "MTA5NTI1MjQ0ODYwMTQ1NjY3Mg.GjaVkI.k8OJ16DqLE1SxwHSoCiXrz20oVF5agg3JtzfOY"
+
 intents = discord.Intents.default()
 intents.message_content = True
 intents.members = True
 intents.typing = False
-# intents.reactions = True
-# intents.guilds = True
+intents.reactions = True
+intents.guilds = True
+
 client = discord.Client(intents=intents)
 
 dbName = "DebtPrompt.db"
@@ -101,9 +103,25 @@ async def getMember(message):
     guild = client.get_guild(message.guild.id)
     members = guild._members
     memberList = []
-    for member in members:
-        memberList.append(member)
+    for member in members.values():
+        if not member.bot:
+            memberList.append(member.id)
     return memberList
+
+
+async def getDebtor(message):
+    list_party = await getMember(message)
+    pattern = ""
+    for id in list_party:
+        pattern += f"<@{id}> | "
+    pattern = pattern.rstrip().rstrip("|").rstrip()
+    return pattern
+
+
+async def getPatternIsRegister(message):
+    pattern = await getDebtor(message)
+    pattern += "[\s]*[0-9]+円"
+    return pattern
 
 
 @client.event
@@ -116,15 +134,41 @@ async def on_message(message):
     if message.author == client.user:
         return
 
-    for mention in message.mentions:
-        if mention.name == "借金催促":
-            member = await getMember(message)
-            await showHistory(searchCheck(message), message.mentions[1].name, message, member)
-        else:
-            messageList = message.content.split()
+    message_content = message.content
+    pattern_is_summon = "<@1095252448601456672>"
+    is_summon = re.match(pattern_is_summon, message_content)
+    if is_summon:
+        debtor = message_content.replace(pattern_is_summon+" ", "", 1)
+        pattern_is_debtor = await getDebtor(message)
+        is_debtor = re.fullmatch(pattern_is_debtor, debtor)
 
-            debtor = message.mentions[0].name
-            # registerToDB(message.author.name, debtor,
-            #              messageList[1], messageList[2], message.id)
+        is_all_debt = re.fullmatch(pattern_is_summon, message_content)
+
+        if is_all_debt:
+            await message.channel.send("すべての債権を表示します。")
+
+        elif not is_debtor:
+            await message.channel.send("不正な入力です")
+            return
+        else:
+            await message.channel.send("～～さんへの債権を表示します。")
+
+    pattern_is_register = await getPatternIsRegister(message)
+    is_register = re.match(pattern_is_register, message_content)
+    if is_register:
+        await message.channel.send("登録できました")
+
+
+@client.event
+async def on_raw_reaction_add(payload):
+    txt_channel = client.get_channel(payload.channel_id)
+    message = await txt_channel.fetch_message(payload.message_id)
+    user = payload.member
+
+    if (user == client.user):
+        return
+
+    msg = message.content
+    await txt_channel.send(msg)
 
 client.run(Token)
