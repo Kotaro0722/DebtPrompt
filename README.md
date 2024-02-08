@@ -83,7 +83,7 @@
 
 # 【データベースの仕様】
 
-| id | debtor | creditor | amount | detail | isRepay |
+| id | debtor | creditor | amount | isRepay |
 
 - id は特に使わない。
 - debtor,creditor,amount,detail,isRepay は【債務者】【債権者】【金額】【詳細】【返済済み】と表記する。
