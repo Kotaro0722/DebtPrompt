@@ -152,6 +152,7 @@ async def on_message(message):
             return
         else:
             await message.channel.send("～～さんへの債権を表示します。")
+            registerToDB()
 
     pattern_is_register = await getPatternIsRegister(message)
     is_register = re.match(pattern_is_register, message_content)
