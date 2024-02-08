@@ -3,12 +3,14 @@ import sqlite3
 import re
 
 Token = "MTA5NTI1MjQ0ODYwMTQ1NjY3Mg.GjaVkI.k8OJ16DqLE1SxwHSoCiXrz20oVF5agg3JtzfOY"
+
 intents = discord.Intents.default()
 intents.message_content = True
 intents.members = True
 intents.typing = False
-# intents.reactions = True
-# intents.guilds = True
+intents.reactions = True
+intents.guilds = True
+
 client = discord.Client(intents=intents)
 
 dbName = "DebtPrompt.db"
@@ -155,8 +157,18 @@ async def on_message(message):
     is_register = re.match(pattern_is_register, message_content)
     if is_register:
         await message.channel.send("登録できました")
-# @client.event
-# async def on_reaction_add(reaction, user):
-#     print("リアクションが付与されました。")
+
+
+@client.event
+async def on_raw_reaction_add(payload):
+    txt_channel = client.get_channel(payload.channel_id)
+    message = await txt_channel.fetch_message(payload.message_id)
+    user = payload.member
+
+    if (user == client.user):
+        return
+
+    msg = message.content
+    await txt_channel.send(msg)
 
 client.run(Token)
