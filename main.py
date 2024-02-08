@@ -152,12 +152,20 @@ async def on_message(message):
             return
         else:
             await message.channel.send("～～さんへの債権を表示します。")
-            registerToDB()
 
     pattern_is_register = await getPatternIsRegister(message)
     is_register = re.match(pattern_is_register, message_content)
     if is_register:
-        await message.channel.send("登録できました")
+        # await message.channel.send("登録できました")
+        pattern_debtor_id = "[0-9]+"
+        debtor_id = re.findall(pattern_debtor_id, message_content)[0]
+
+        creditor = message.author
+
+        pattern_amount = pattern_debtor_id
+        amount = re.findall(pattern_amount, message_content)[1]
+
+        message_id = message.id
 
 
 @client.event
