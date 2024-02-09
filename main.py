@@ -27,9 +27,7 @@ def registerToDB(id, creditor, debtor, amount):
     cursor = connect.cursor()
 
     sql_insert_data = f"INSERT INTO debt(id,creditor,debtor,amount,ispay) values({id},'{creditor}','{debtor}','{amount}',0)"
-    sql_show_data = "SELECT * FROM debt"
     cursor.execute(sql_insert_data)
-    cursor.execute(sql_show_data)
 
     connect.commit()
 
