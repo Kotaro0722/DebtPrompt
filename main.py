@@ -31,9 +31,6 @@ def registerToDB(id, creditor, debtor, amount):
     cursor.execute(sql_insert_data)
     cursor.execute(sql_show_data)
 
-    for row in cursor:
-        print(row)
-
     connect.commit()
 
     cursor.close()
