@@ -35,14 +35,14 @@ def registerToDB(id, creditor, debtor, amount):
     connect.close()
 
 
-def showDebt(debtor):
-    connect = sqlite3.connect(dbName)
-    cursor = connect.cursor()
-    select = "SELECT creditor,amount,detail,isRepay FROM debt WHERE debtor=(:debtor) AND isRepay=(:isRepay)"
-    selectList = {"debtor": debtor, "isRepay": 0}
-    cursor.execute(select, selectList)
-    data = cursor.fetchall()
-    return data
+# def showDebt(debtor):
+#     connect = sqlite3.connect(dbName)
+#     cursor = connect.cursor()
+#     select = "SELECT creditor,amount,detail,isRepay FROM debt WHERE debtor=(:debtor) AND isRepay=(:isRepay)"
+#     selectList = {"debtor": debtor, "isRepay": 0}
+#     cursor.execute(select, selectList)
+#     data = cursor.fetchall()
+#     return data
 
 
 def showCredit(creditor):
