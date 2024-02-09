@@ -85,8 +85,9 @@
 
 | id | debtor | creditor | amount | isRepay |
 
-- id は特に使わない。
-- debtor,creditor,amount,detail,isRepay は【債務者】【債権者】【金額】【詳細】【返済済み】と表記する。
+- MySQL で実装する
+- id は【メッセージ id】を使用する
+- debtor,creditor,amount,detail,isRepay は【債務者】【債権者】【金額】【返済済み】と表記する。
 
 ---
 
@@ -94,13 +95,12 @@
 
 ## 1. registerToDB()
 
-- 引数：債権者、メッセージの内容
+- 引数：メッセージの id,債権者の id,債務者の id,金額
 - 戻り値：なし
 - 処理：
-  - メッセージの内容を【債務者】【金額】【詳細】に分ける。
-  - データベース"DebtManager.db"に接続し、レコードに【債務者】【債権者】【金額】【詳細】【返済済み】を保存する。
-  - 【返済済み】は必ず 0(false)とする。
-  - データベースとの接続を解除する。
+  - MySQL にアクセスする
+  - 引数をそれぞれ、id,creditor,debtor,amount とし、返済済みは必ず 0(false)としてデータベースに登録する。
+  -
 
 ## 2. showDebt()
 
@@ -152,7 +152,7 @@
   - さらに splitList 関数に通す。
   - データをディスコードに投稿する
 
-## 8.getMember()
+## 8.getMemberList()
 
 - 引数:メッセージ
 - 戻り値:グループに含まれるメンバーのリスト

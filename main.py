@@ -1,5 +1,5 @@
 import discord
-import sqlite3
+import MySQLdb
 import re
 
 Token = "MTA5NTI1MjQ0ODYwMTQ1NjY3Mg.GjaVkI.k8OJ16DqLE1SxwHSoCiXrz20oVF5agg3JtzfOY"
@@ -13,26 +13,26 @@ intents.guilds = True
 
 client = discord.Client(intents=intents)
 
-dbName = "DebtPrompt.db"
+dbName = "test_debt"
 
 
-def registerToDB(creditor, debtor, amount, notes, id):
-    connect = sqlite3.connect(dbName)
+def registerToDB(id, creditor, debtor, amount):
+    connect = MySQLdb.connect(
+        host="localhost",
+        user="root",
+        password="kotaro0722",
+        db=dbName
+    )
+
     cursor = connect.cursor()
-    insert = """INSERT INTO debt(id,debtor, creditor, amount, detail, isRepay) VALUES(:id,:debtor, :creditor, :amount, :detail, :isRepay)"""
-    insertList = {
-        "id": id,
-        "debtor": debtor,
-        "creditor": creditor,
-        "amount": amount,
-        "detail": notes,
-        "isRepay": 0
-    }
-    cursor.execute(insert, insertList)
-    data = cursor.fetchall()
+
+    sql_insert_data = f"INSERT INTO debt(id,creditor,debtor,amount,ispay) values({id},'{creditor}','{debtor}','{amount}',0)"
+    cursor.execute(sql_insert_data)
+
     connect.commit()
+
+    cursor.close()
     connect.close()
-    return data
 
 
 def showDebt(debtor):
@@ -99,7 +99,7 @@ async def showHistory(isDebtor: bool, person, message, member):
     #     await message.channel.send(splitData[datum])
 
 
-async def getMember(message):
+async def getMemberList(message):
     guild = client.get_guild(message.guild.id)
     members = guild._members
     memberList = []
@@ -110,7 +110,7 @@ async def getMember(message):
 
 
 async def getDebtor(message):
-    list_party = await getMember(message)
+    list_party = await getMemberList(message)
     pattern = ""
     for id in list_party:
         pattern += f"<@{id}> | "
@@ -156,7 +156,17 @@ async def on_message(message):
     pattern_is_register = await getPatternIsRegister(message)
     is_register = re.match(pattern_is_register, message_content)
     if is_register:
-        await message.channel.send("登録できました")
+        pattern_debtor_id = "[0-9]+"
+        debtor = re.findall(pattern_debtor_id, message_content)[0]
+
+        creditor = message.author.id
+
+        pattern_amount = pattern_debtor_id
+        amount = re.findall(pattern_amount, message_content)[1]
+
+        id = message.id
+
+        registerToDB(id, creditor, debtor, amount)
 
 
 @client.event
