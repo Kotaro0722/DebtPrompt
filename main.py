@@ -1,6 +1,8 @@
 import discord
 import MySQLdb
+import numpy as np
 import re
+from mydblib import my_select
 
 Token = "MTA5NTI1MjQ0ODYwMTQ1NjY3Mg.GjaVkI.k8OJ16DqLE1SxwHSoCiXrz20oVF5agg3JtzfOY"
 
@@ -45,45 +47,65 @@ def registerToDB(id, creditor, debtor, amount):
 #     return data
 
 
-def showCredit(creditor):
-    connect = sqlite3.connect(dbName)
-    cursor = connect.cursor()
-    select = "SELECT creditor,amount,detail FROM debt WHERE creditor=(:creditor) AND isRepay=(:isRepay)"
-    selectList = {"creditor": creditor, "isRepay": 0}
-    cursor.execute(select, selectList)
-    data = cursor.fetchall()
-    return data
+# def showCredit(creditor):
+#     connect = MySQLdb.connect(
+#         host="localhost",
+#         user="root",
+#         password="kotaro0722",
+#         db=dbName
+#     )
+#     cursor = connect.cursor()
+
+#     sql_select_data = f"SELECT debtor,amount FROM debt WHERE ispay=0 AND creditor={creditor};"
+#     cursor.execute(sql_select_data)
+
+#     data = np.array()
+#     for row in cursor:
+#         data = np.append(data, row, axis=0)
+#     print(data)
+
+#     connect.commit()
+
+#     cursor.close()
+#     connect.close()
 
 
-def arrangeList(lists: list):
-    newLists = []
-    for list in lists:
-        l = list[0:2:1]
-        newLists.append(l)
-    return newLists
+def showAllCredit(creditor):
+    sql_string = f"SELECT * FROM debt WHERE creditor={creditor} AND ispay=0"
+    data = my_select(dbName, sql_string)
+    # sum = data.groupby("debtor").sum(numeric_only=True)
+    print(data)
 
 
-def splitList(lists: list, members):
-    returnObject = {}
-    for list in lists:
-        counter = 0
-        for member in members:
-            if member == list[0]:
-                counter += list[1]
-        returnObject[member] = counter
-    return returnObject
+# def arrangeList(lists: list):
+#     newLists = []
+#     for list in lists:
+#         l = list[0:2:1]
+#         newLists.append(l)
+#     return newLists
 
 
-def searchCheck(message: discord.Message):
-    pattern = "!"
-    repattern = re.compile(pattern)
-    result = repattern.match(message)
-    return result
-    # checker = False
-    # for phrase in message.content:
-    #     if phrase == "!":
-    #         checker = True
-    # return checker
+# def splitList(lists: list, members):
+#     returnObject = {}
+#     for list in lists:
+#         counter = 0
+#         for member in members:
+#             if member == list[0]:
+#                 counter += list[1]
+#         returnObject[member] = counter
+#     return returnObject
+
+
+# def searchCheck(message: discord.Message):
+#     pattern = "!"
+#     repattern = re.compile(pattern)
+#     result = repattern.match(message)
+#     return result
+#     # checker = False
+#     # for phrase in message.content:
+#     #     if phrase == "!":
+#     #         checker = True
+#     # return checker
 
 
 async def showHistory(isDebtor: bool, person, message, member):
@@ -104,8 +126,8 @@ async def getMemberList(message):
     members = guild._members
     memberList = []
     for member in members.values():
-        if not member.bot:
-            memberList.append(member.id)
+        # if not member.bot:
+        memberList.append(member.id)
     return memberList
 
 
@@ -120,7 +142,7 @@ async def getDebtor(message):
 
 async def getPatternIsRegister(message):
     pattern = await getDebtor(message)
-    pattern += "[\s]*[0-9]+円"
+    pattern += r"\s[0-9]+円"
     return pattern
 
 
@@ -146,15 +168,17 @@ async def on_message(message):
 
         if is_all_debt:
             await message.channel.send("すべての債権を表示します。")
+            showAllCredit(message.author.id)
 
-        elif not is_debtor:
-            await message.channel.send("不正な入力です")
-            return
-        else:
+        elif is_debtor:
             await message.channel.send("～～さんへの債権を表示します。")
+        else:
+            await message.channel.send("不正な入力です")
 
     pattern_is_register = await getPatternIsRegister(message)
     is_register = re.match(pattern_is_register, message_content)
+    print(pattern_is_register)
+    print(is_register)
     if is_register:
         pattern_debtor_id = "[0-9]+"
         debtor = re.findall(pattern_debtor_id, message_content)[0]
@@ -167,6 +191,7 @@ async def on_message(message):
         id = message.id
 
         registerToDB(id, creditor, debtor, amount)
+        await message.channel.send("登録できました")
 
 
 @client.event
