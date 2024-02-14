@@ -126,8 +126,8 @@ async def getMemberList(message):
     members = guild._members
     memberList = []
     for member in members.values():
-        # if not member.bot:
-        memberList.append(member.id)
+        if not member.bot:
+            memberList.append(member.id)
     return memberList
 
 
@@ -135,8 +135,9 @@ async def getDebtor(message):
     list_party = await getMemberList(message)
     pattern = ""
     for id in list_party:
-        pattern += f"<@{id}> | "
-    pattern = pattern.rstrip().rstrip("|").rstrip()
+        pattern += f"<@{id}>|"
+    pattern = pattern.rstrip("|")
+    pattern += ""
     return pattern
 
 
@@ -176,9 +177,7 @@ async def on_message(message):
             await message.channel.send("不正な入力です")
 
     pattern_is_register = await getPatternIsRegister(message)
-    is_register = re.match(pattern_is_register, message_content)
-    print(pattern_is_register)
-    print(is_register)
+    is_register = re.search(pattern_is_register, message_content)
     if is_register:
         pattern_debtor_id = "[0-9]+"
         debtor = re.findall(pattern_debtor_id, message_content)[0]
