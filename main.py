@@ -37,44 +37,12 @@ def registerToDB(id, creditor, debtor, amount):
     connect.close()
 
 
-# def showDebt(debtor):
-#     connect = sqlite3.connect(dbName)
-#     cursor = connect.cursor()
-#     select = "SELECT creditor,amount,detail,isRepay FROM debt WHERE debtor=(:debtor) AND isRepay=(:isRepay)"
-#     selectList = {"debtor": debtor, "isRepay": 0}
-#     cursor.execute(select, selectList)
-#     data = cursor.fetchall()
-#     return data
-
-
-# def showCredit(creditor):
-#     connect = MySQLdb.connect(
-#         host="localhost",
-#         user="root",
-#         password="kotaro0722",
-#         db=dbName
-#     )
-#     cursor = connect.cursor()
-
-#     sql_select_data = f"SELECT debtor,amount FROM debt WHERE ispay=0 AND creditor={creditor};"
-#     cursor.execute(sql_select_data)
-
-#     data = np.array()
-#     for row in cursor:
-#         data = np.append(data, row, axis=0)
-#     print(data)
-
-#     connect.commit()
-
-#     cursor.close()
-#     connect.close()
-
-
-def showAllCredit(creditor):
-    sql_string = f"SELECT * FROM debt WHERE creditor={creditor} AND ispay=0"
+async def showAllCredit(creditor, message):
+    sql_string = f"SELECT debtor,amount FROM debt WHERE creditor={creditor} AND ispay=0"
     data = my_select(dbName, sql_string)
-    # sum = data.groupby("debtor").sum(numeric_only=True)
-    print(data)
+    sum = data.groupby("debtor").sum(numeric_only=True)
+    for i in range(len(sum)):
+        await message.channel.send(f"<@{sum[i:i+1].index[0]}>:{sum[i:i+1]["amount"].iloc[-1]}円")
 
 
 # def arrangeList(lists: list):
@@ -108,15 +76,15 @@ def showAllCredit(creditor):
 #     # return checker
 
 
-async def showHistory(isDebtor: bool, person, message, member):
-    data = 0
-    if isDebtor:
-        data = showDebt(message.mentions[1].name)
-    else:
-        data = showCredit(message.mentions[1].name)
-    arrangeData = arrangeList(data)
-    splitData = splitList(arrangeData, member)
-    await message.channel.send(splitData)
+# async def showHistory(isDebtor: bool, person, message, member):
+    # data = 0
+    # if isDebtor:
+    #     data = showDebt(message.mentions[1].name)
+    # else:
+    #     data = showCredit(message.mentions[1].name)
+    # arrangeData = arrangeList(data)
+    # splitData = splitList(arrangeData, member)
+    # await message.channel.send(splitData)
     # for datum in splitData:
     #     await message.channel.send(splitData[datum])
 
@@ -169,7 +137,7 @@ async def on_message(message):
 
         if is_all_debt:
             await message.channel.send("すべての債権を表示します。")
-            showAllCredit(message.author.id)
+            await showAllCredit(message.author.id, message)
 
         elif is_debtor:
             await message.channel.send("～～さんへの債権を表示します。")
