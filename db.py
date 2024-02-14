@@ -15,8 +15,9 @@ sql_insert_data = "INSERT INTO debt(id,creditor,debtor,amount,ispay) values(1,'k
 sql_alter_column1 = "ALTER TABLE debt MODIFY COLUMN id BIGINT"
 sql_alter_column2 = "ALTER TABLE debt MODIFY COLUMN creditor BIGINT, MODIFY COLUMN debtor BIGINT"
 sql_delete_data = "DELETE FROM debt WHERE id = 1;"
+sql_select_data = "SELECT debtor,amount,ispay FROM debt WHERE ispay=0 AND creditor=960825958208765973"
 
-cursor.execute(sql_alter_column2)
+cursor.execute(sql_select_data)
 
 for row in cursor:
     print(row)
