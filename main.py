@@ -48,7 +48,6 @@ async def showOneCredit(creditor,debtor,message):
     sql_string=f"SELECT amount FROM debt WHERE creditor={creditor} AND debtor={debtor} AND ispay=0;"
     data=my_select(dbName,sql_string)
     sum=data.sum(numeric_only=True)
-    print(sum)
     await message.channel.send(f"<@{debtor}>:{sum.iloc[-1]}円")
 
 # def arrangeList(lists: list):
@@ -100,24 +99,24 @@ async def getMemberList(message):
     members = guild._members
     memberList = []
     for member in members.values():
-        if not member.bot:
-            memberList.append(member.id)
+        # if not member.bot:
+        memberList.append(member.id)
     return memberList
 
 
 async def getDebtor(message):
     list_party = await getMemberList(message)
-    pattern = ""
+    pattern = "("
     for id in list_party:
         pattern += f"<@{id}>|"
     pattern = pattern.rstrip("|")
-    pattern += ""
+    pattern += ")"
     return pattern
 
 
 async def getPatternIsRegister(message):
     pattern = await getDebtor(message)
-    pattern += r"\s[0-9]+円"
+    pattern += r"\s*[0-9]+円"
     return pattern
 
 
@@ -150,7 +149,7 @@ async def on_message(message):
             await message.channel.send("不正な入力です")
 
     pattern_is_register = await getPatternIsRegister(message)
-    is_register = re.search(pattern_is_register, message_content)
+    is_register = re.fullmatch(pattern_is_register, message_content)
     if is_register:
         pattern_debtor_id = "[0-9]+"
         debtor = re.findall(pattern_debtor_id, message_content)[0]
@@ -158,7 +157,7 @@ async def on_message(message):
         creditor = message.author.id
 
         pattern_amount = pattern_debtor_id
-        amount = re.findall(pattern_amount, message_content)[1]
+        amount = re.search(pattern_amount, message_content)[1]
 
         id = message.id
 
