@@ -51,50 +51,6 @@ async def showOneCredit(creditor, debtor, message):
     sum = data.sum(numeric_only=True)
     await message.channel.send(f"<@{debtor}>:{sum.iloc[-1]}円")
 
-# def arrangeList(lists: list):
-#     newLists = []
-#     for list in lists:
-#         l = list[0:2:1]
-#         newLists.append(l)
-#     return newLists
-
-
-# def splitList(lists: list, members):
-#     returnObject = {}
-#     for list in lists:
-#         counter = 0
-#         for member in members:
-#             if member == list[0]:
-#                 counter += list[1]
-#         returnObject[member] = counter
-#     return returnObject
-
-
-# def searchCheck(message: discord.Message):
-#     pattern = "!"
-#     repattern = re.compile(pattern)
-#     result = repattern.match(message)
-#     return result
-#     # checker = False
-#     # for phrase in message.content:
-#     #     if phrase == "!":
-#     #         checker = True
-#     # return checker
-
-
-# async def showHistory(isDebtor: bool, person, message, member):
-    # data = 0
-    # if isDebtor:
-    #     data = showDebt(message.mentions[1].name)
-    # else:
-    #     data = showCredit(message.mentions[1].name)
-    # arrangeData = arrangeList(data)
-    # splitData = splitList(arrangeData, member)
-    # await message.channel.send(splitData)
-    # for datum in splitData:
-    #     await message.channel.send(splitData[datum])
-
-
 async def getMemberList(message):
     guild = client.get_guild(message.guild.id)
     members = guild._members
