@@ -116,7 +116,7 @@ async def getDebtor(message):
 
 async def getPatternIsRegister(message):
     pattern = await getDebtor(message)
-    pattern += r"\s*[0-9]+円"
+    pattern += r"\s*[0-9]+円\s*.*"
     return pattern
 
 
@@ -157,7 +157,7 @@ async def on_message(message):
         creditor = message.author.id
 
         pattern_amount = pattern_debtor_id
-        amount = re.search(pattern_amount, message_content)[1]
+        amount = re.findall(pattern_amount, message_content)[1]
 
         id = message.id
 
