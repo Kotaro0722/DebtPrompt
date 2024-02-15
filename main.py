@@ -131,7 +131,7 @@ async def on_raw_reaction_add(payload):
     if (user == client.user):
         return
 
-    msg = message.content
-    await txt_channel.send(msg)
+    # msg = message.content
+    # await txt_channel.send(msg)
 
 client.run(Token)
