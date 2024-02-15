@@ -44,6 +44,12 @@ async def showAllCredit(creditor, message):
     for i in range(len(sum)):
         await message.channel.send(f"<@{sum[i:i+1].index[0]}>:{sum[i:i+1]["amount"].iloc[-1]}円")
 
+async def showOneCredit(creditor,debtor,message):
+    sql_string=f"SELECT amount FROM debt WHERE creditor={creditor} AND debtor={debtor} AND ispay=0;"
+    data=my_select(dbName,sql_string)
+    sum=data.sum(numeric_only=True)
+    print(sum)
+    await message.channel.send(f"<@{debtor}>:{sum.iloc[-1]}円")
 
 # def arrangeList(lists: list):
 #     newLists = []
@@ -129,18 +135,17 @@ async def on_message(message):
     pattern_is_summon = "<@1095252448601456672>"
     is_summon = re.match(pattern_is_summon, message_content)
     if is_summon:
-        debtor = message_content.replace(pattern_is_summon+" ", "", 1)
-        pattern_is_debtor = await getDebtor(message)
-        is_debtor = re.fullmatch(pattern_is_debtor, debtor)
+        pattern_is_debtor = pattern_is_summon+r"\s*"+await getDebtor(message)
+        is_debtor = re.fullmatch(pattern_is_debtor, message_content)
 
         is_all_debt = re.fullmatch(pattern_is_summon, message_content)
 
         if is_all_debt:
-            await message.channel.send("すべての債権を表示します。")
             await showAllCredit(message.author.id, message)
 
         elif is_debtor:
-            await message.channel.send("～～さんへの債権を表示します。")
+            debtor = re.findall(r"[0-9]+",message_content)[1]
+            await showOneCredit(message.author.id,debtor,message)
         else:
             await message.channel.send("不正な入力です")
 
