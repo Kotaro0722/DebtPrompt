@@ -44,10 +44,11 @@ async def showAllCredit(creditor, message):
     for i in range(len(sum)):
         await message.channel.send(f"<@{sum[i:i+1].index[0]}>:{sum[i:i+1]["amount"].iloc[-1]}円")
 
-async def showOneCredit(creditor,debtor,message):
-    sql_string=f"SELECT amount FROM debt WHERE creditor={creditor} AND debtor={debtor} AND ispay=0;"
-    data=my_select(dbName,sql_string)
-    sum=data.sum(numeric_only=True)
+
+async def showOneCredit(creditor, debtor, message):
+    sql_string = f"SELECT amount FROM debt WHERE creditor={creditor} AND debtor={debtor} AND ispay=0;"
+    data = my_select(dbName, sql_string)
+    sum = data.sum(numeric_only=True)
     await message.channel.send(f"<@{debtor}>:{sum.iloc[-1]}円")
 
 # def arrangeList(lists: list):
@@ -99,8 +100,8 @@ async def getMemberList(message):
     members = guild._members
     memberList = []
     for member in members.values():
-        # if not member.bot:
-        memberList.append(member.id)
+        if not member.bot:
+            memberList.append(member.id)
     return memberList
 
 
@@ -143,8 +144,8 @@ async def on_message(message):
             await showAllCredit(message.author.id, message)
 
         elif is_debtor:
-            debtor = re.findall(r"[0-9]+",message_content)[1]
-            await showOneCredit(message.author.id,debtor,message)
+            debtor = re.findall(r"[0-9]+", message_content)[1]
+            await showOneCredit(message.author.id, debtor, message)
         else:
             await message.channel.send("不正な入力です")
 
