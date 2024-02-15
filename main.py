@@ -3,6 +3,7 @@ import MySQLdb
 import numpy as np
 import re
 from mydblib import my_select
+from mydblib2 import my_update
 
 Token = "MTA5NTI1MjQ0ODYwMTQ1NjY3Mg.GjaVkI.k8OJ16DqLE1SxwHSoCiXrz20oVF5agg3JtzfOY"
 
@@ -16,6 +17,7 @@ intents.guilds = True
 client = discord.Client(intents=intents)
 
 dbName = "test_debt"
+main_table="debt"
 
 
 def registerToDB(id, creditor, debtor, amount):
@@ -28,7 +30,7 @@ def registerToDB(id, creditor, debtor, amount):
 
     cursor = connect.cursor()
 
-    sql_insert_data = f"INSERT INTO debt(id,creditor,debtor,amount,ispay) values({id},'{creditor}','{debtor}','{amount}',0)"
+    sql_insert_data = f"INSERT INTO {main_table}(id,creditor,debtor,amount,ispay) values({id},'{creditor}','{debtor}','{amount}',0)"
     cursor.execute(sql_insert_data)
 
     connect.commit()
@@ -36,9 +38,8 @@ def registerToDB(id, creditor, debtor, amount):
     cursor.close()
     connect.close()
 
-
 async def showAllCredit(creditor, message):
-    sql_string = f"SELECT debtor,amount FROM debt WHERE creditor={creditor} AND ispay=0"
+    sql_string = f"SELECT debtor,amount FROM {main_table} WHERE creditor={creditor} AND ispay=0"
     data = my_select(dbName, sql_string)
     sum = data.groupby("debtor").sum(numeric_only=True)
     for i in range(len(sum)):
@@ -46,7 +47,7 @@ async def showAllCredit(creditor, message):
 
 
 async def showOneCredit(creditor, debtor, message):
-    sql_string = f"SELECT amount FROM debt WHERE creditor={creditor} AND debtor={debtor} AND ispay=0;"
+    sql_string = f"SELECT amount FROM {main_table} WHERE creditor={creditor} AND debtor={debtor} AND ispay=0;"
     data = my_select(dbName, sql_string)
     sum = data.sum(numeric_only=True)
     await message.channel.send(f"<@{debtor}>:{sum.iloc[-1]}円")
@@ -76,6 +77,9 @@ async def getPatternIsRegister(message):
     pattern += r"\s*[0-9]+円\s*.*"
     return pattern
 
+async def payDebt(message_id):
+    sql_string=f"UPDATE {main_table} SET ispay=1 WHERE id={message_id}"
+    my_update(dbName,sql_string)
 
 @client.event
 async def on_ready():
@@ -131,6 +135,7 @@ async def on_raw_reaction_add(payload):
     if (user == client.user):
         return
 
+    await payDebt(message.id)
     # msg = message.content
     # await txt_channel.send(msg)
 
