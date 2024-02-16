@@ -89,11 +89,11 @@ async def getPatternIsRegister(message):
     pattern += r"\s*[0-9]+円\s*.*"
     return pattern
 
-async def payDebt(message_id):
+def payDebt(message_id):
     sql_string=f"UPDATE {main_table} SET ispay=1 WHERE id={message_id}"
-    my_update(dbName,sql_string)
-
-async def cancelPayDebt(message_id):
+    my_update(dbName,sql_string) 
+    
+def cancelPayDebt(message_id):
     sql_string=f"UPDATE {main_table} SET ispay=0 WHERE id={message_id}"
     my_update(dbName,sql_string)
 
@@ -157,7 +157,7 @@ async def on_raw_reaction_add(payload):
     if payload.emoji.name!="✅":
         return
     
-    await payDebt(message.id)
+    payDebt(message.id)
     
 @client.event
 async def on_raw_reaction_remove(payload):
@@ -174,6 +174,6 @@ async def on_raw_reaction_remove(payload):
     if payload.emoji.name!="✅":
         return
     
-    await cancelPayDebt(message.id)
+    cancelPayDebt(message.id)
     
 client.run(Token)
