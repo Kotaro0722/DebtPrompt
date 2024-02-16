@@ -134,6 +134,9 @@ async def on_raw_reaction_add(payload):
 
     if (user == client.user):
         return
+    
+    if(message.author.id!=payload.user_id):
+        return 
 
     await payDebt(message.id)
     # msg = message.content
