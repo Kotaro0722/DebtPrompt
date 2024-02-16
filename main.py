@@ -132,14 +132,15 @@ async def on_raw_reaction_add(payload):
     message = await txt_channel.fetch_message(payload.message_id)
     user = payload.member
 
-    if (user == client.user):
+    if user == client.user:
         return
     
-    if(message.author.id!=payload.user_id):
+    if message.author.id!=payload.user_id:
         return 
 
+    if payload.emoji.name!="✅":
+        return
+    
     await payDebt(message.id)
-    # msg = message.content
-    # await txt_channel.send(msg)
-
+    
 client.run(Token)
