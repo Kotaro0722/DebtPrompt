@@ -53,7 +53,18 @@ async def showOneCredit(creditor, debtor, message):
     sql_string = f"SELECT amount FROM {main_table} WHERE creditor={creditor} AND debtor={debtor} AND ispay=0;"
     data = my_select(dbName, sql_string)
     sum = data.sum(numeric_only=True)
-    await message.channel.send(f"<@{debtor}>:{sum.iloc[-1]}円")
+    message_send= await message.channel.send(f"<@{debtor}>:{sum.iloc[-1]}円")
+    
+    sql_string=f"SELECT id FROM {main_table} WHERE creditor={creditor} AND debtor={debtor} AND ispay=0;"
+    data=my_select(dbName,sql_string)
+    createNewTable(message_send.id,data)
+
+def createNewTable(message_id,data):
+    sql_string=f"CREATE TABLE sum_{message_id}(id VARCHAR(20) PRIMARY KEY);"
+    my_update(dbName,sql_string)
+    for i in range(len(data)):
+        sql_insert_data = f"INSERT INTO sum_{message_id}(id) values({data.at[i,"id"]});"
+        my_update(dbName,sql_insert_data)
 
 async def getMemberList(message):
     guild = client.get_guild(message.guild.id)
@@ -86,13 +97,7 @@ async def cancelPayDebt(message_id):
     sql_string=f"UPDATE {main_table} SET ispay=0 WHERE id={message_id}"
     my_update(dbName,sql_string)
 
-def createNewTable(message_id,data):
-    sql_string=f"CREATE TABLE sum_{message_id}(id VARCHAR(20) PRIMARY KEY);"
-    my_update(dbName,sql_string)
-    for i in range(len(data)):
-        sql_insert_data = f"INSERT INTO sum_{message_id}(id) values({data.at[i,"id"]});"
-        my_update(dbName,sql_insert_data)
-        
+     
     
 @client.event
 async def on_ready():
