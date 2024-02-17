@@ -89,15 +89,25 @@ async def getPatternIsRegister(message):
     pattern += r"\s*[0-9]+円\s*.*"
     return pattern
 
-def payDebt(message_id):
+def payOneDebt(message_id):
     sql_string=f"UPDATE {main_table} SET ispay=1 WHERE id={message_id}"
     my_update(dbName,sql_string) 
     
-def cancelPayDebt(message_id):
+def payAllDebt(message_id):
+    sql_string=f"SELECT * FROM sum_{message_id}"
+    data=my_select(dbName,sql_string)
+    for i in range(len(data)):
+        payOneDebt(data.at[i,"id"])
+    
+def cancelOnePayDebt(message_id):
     sql_string=f"UPDATE {main_table} SET ispay=0 WHERE id={message_id}"
     my_update(dbName,sql_string)
 
-     
+def cancelAllPayDebt(message_id):
+    sql_string=f"SELECT * FROM sum_{message_id}"
+    data=my_select(dbName,sql_string)
+    for i in range(len(data)):
+        cancelOnePayDebt(data.at[i,"id"])
     
 @client.event
 async def on_ready():
@@ -146,18 +156,21 @@ async def on_message(message):
 async def on_raw_reaction_add(payload):
     txt_channel = client.get_channel(payload.channel_id)
     message = await txt_channel.fetch_message(payload.message_id)
-    user = payload.member
-
+    user = payload.user_id
+    
     if user == client.user:
         return
     
-    if message.author.id!=payload.user_id:
+    if message.author.id!=payload.user_id and message.author.id!=client.user.id:
         return 
 
     if payload.emoji.name!="✅":
         return
     
-    payDebt(message.id)
+    if message.author.id==client.user.id :
+        payAllDebt(message.id)
+    else :
+        payOneDebt(message.id)
     
 @client.event
 async def on_raw_reaction_remove(payload):
@@ -168,12 +181,15 @@ async def on_raw_reaction_remove(payload):
     if user == client.user:
         return
     
-    if message.author.id!=payload.user_id:
+    if message.author.id!=payload.user_id and message.author.id!=client.user.id:
         return 
 
     if payload.emoji.name!="✅":
         return
     
-    cancelPayDebt(message.id)
+    if message.author.id==client.user.id :
+        cancelAllPayDebt(message.id)
+    else :
+        cancelOnePayDebt(message.id)
     
 client.run(Token)
