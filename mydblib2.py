@@ -7,7 +7,7 @@ import config
 def my_update(db, sql_string):
     try:
         dbcon = mydb.connect(
-            host="localhost",
+            host=config.HOST,
             user=config.USER,
             password=config.PASSWORD,
             database=db

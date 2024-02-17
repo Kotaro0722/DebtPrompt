@@ -25,7 +25,7 @@ register_channel_id = config.REGISTER_CHANNEL_ID
 
 def registerToDB(id, creditor, debtor, amount):
     connect = MySQLdb.connect(
-        host="localhost",
+        host=config.HOST,
         user=config.USER,
         password=config.PASSWORD,
         db=dbName

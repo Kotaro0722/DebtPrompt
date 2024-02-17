@@ -5,6 +5,7 @@ load_dotenv()
 
 TOKEN = os.getenv("TOKEN")
 
+HOST = os.getenv("HOST")
 USER = os.getenv("USER")
 PASSWORD = os.getenv("PASSWORD")
 
