@@ -19,6 +19,7 @@ client = discord.Client(intents=intents)
 dbName = "test_debt"
 main_table="debt"
 
+register_channel_id=1150109427182096394
 
 def registerToDB(id, creditor, debtor, amount):
     connect = MySQLdb.connect(
@@ -93,21 +94,25 @@ def payOneDebt(message_id):
     sql_string=f"UPDATE {main_table} SET ispay=1 WHERE id={message_id}"
     my_update(dbName,sql_string) 
     
-def payAllDebt(message_id):
+async def payAllDebt(message_id,channel):
     sql_string=f"SELECT * FROM sum_{message_id}"
     data=my_select(dbName,sql_string)
     for i in range(len(data)):
         payOneDebt(data.at[i,"id"])
+        message= await channel.fetch_message(data.at[i,"id"])
+        await message.add_reaction("✅")
     
 def cancelOnePayDebt(message_id):
     sql_string=f"UPDATE {main_table} SET ispay=0 WHERE id={message_id}"
     my_update(dbName,sql_string)
 
-def cancelAllPayDebt(message_id):
+async def cancelAllPayDebt(message_id,channel):
     sql_string=f"SELECT * FROM sum_{message_id}"
     data=my_select(dbName,sql_string)
     for i in range(len(data)):
         cancelOnePayDebt(data.at[i,"id"])
+        message= await channel.fetch_message(data.at[i,"id"])
+        await message.remove_reaction("✅",client.user)
     
 @client.event
 async def on_ready():
@@ -167,8 +172,9 @@ async def on_raw_reaction_add(payload):
     if payload.emoji.name!="✅":
         return
     
+    register_channel=client.get_channel(register_channel_id)
     if message.author.id==client.user.id :
-        payAllDebt(message.id)
+        await payAllDebt(message.id,register_channel)
     else :
         payOneDebt(message.id)
     
@@ -187,8 +193,9 @@ async def on_raw_reaction_remove(payload):
     if payload.emoji.name!="✅":
         return
     
+    register_channel=client.get_channel(register_channel_id)
     if message.author.id==client.user.id :
-        cancelAllPayDebt(message.id)
+        await cancelAllPayDebt(message.id,register_channel)
     else :
         cancelOnePayDebt(message.id)
     
