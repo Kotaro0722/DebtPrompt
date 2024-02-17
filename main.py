@@ -17,10 +17,10 @@ intents.guilds = True
 
 client = discord.Client(intents=intents)
 
-dbName = "test_debt"
-main_table="debt"
+dbName = config.DBNAME
+main_table=config.MAIN_TABLE
 
-register_channel_id=1150109427182096394
+register_channel_id=config.REGISTER_CHANNEL_ID
 
 def registerToDB(id, creditor, debtor, amount):
     connect = MySQLdb.connect(
