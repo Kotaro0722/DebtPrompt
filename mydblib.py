@@ -1,14 +1,15 @@
 import mysql.connector as mydb
 import pandas as pd
 import sys
+import config
 
 
 def my_select(db, sql_string):
     try:
         dbcon = mydb.connect(
             host="localhost",
-            user="root",
-            password="kotaro0722",
+            user=config.USER,
+            password=config.PASSWORD,
             database=db
         )
         cursor = dbcon.cursor(dictionary=True)

@@ -4,8 +4,9 @@ import numpy as np
 import re
 from mydblib import my_select
 from mydblib2 import my_update
+import config
 
-Token = "MTA5NTI1MjQ0ODYwMTQ1NjY3Mg.GjaVkI.k8OJ16DqLE1SxwHSoCiXrz20oVF5agg3JtzfOY"
+Token = config.TOKEN
 
 intents = discord.Intents.default()
 intents.message_content = True
@@ -24,8 +25,8 @@ register_channel_id=1150109427182096394
 def registerToDB(id, creditor, debtor, amount):
     connect = MySQLdb.connect(
         host="localhost",
-        user="root",
-        password="kotaro0722",
+        user=config.USER,
+        password=config.PASSWORD,
         db=dbName
     )
 
