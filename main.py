@@ -192,7 +192,7 @@ async def on_raw_reaction_add(payload):
         await message.remove_reaction("✅", client.user)
         return
 
-    register_channel = client.get_channel(register_channel_id)
+    register_channel = client.get_channel(int(register_channel_id))
     if message.author.id == client.user.id:
         await payAllDebt(message.id, register_channel)
     else:
@@ -214,7 +214,7 @@ async def on_raw_reaction_remove(payload):
     if payload.emoji.name != "✅":
         return
 
-    register_channel = client.get_channel(register_channel_id)
+    register_channel = client.get_channel(int(register_channel_id))
     if message.author.id == client.user.id:
         await cancelAllPayDebt(message.id, register_channel)
     else:
