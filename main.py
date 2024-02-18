@@ -28,6 +28,7 @@ def registerToDB(id, creditor, debtor, amount):
         host=config.HOST,
         user=config.USER,
         password=config.PASSWORD,
+        port=config.PORT,
         db=dbName
     )
 
