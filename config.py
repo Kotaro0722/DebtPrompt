@@ -8,6 +8,7 @@ TOKEN = os.getenv("TOKEN")
 HOST = os.getenv("HOST")
 USER = os.getenv("USER")
 PASSWORD = os.getenv("PASSWORD")
+PORT = os.getenv("PORT")
 
 DBNAME = os.getenv("DBNAME")
 MAIN_TABLE = os.getenv("MAIN_TABLE")

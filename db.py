@@ -1,23 +1,26 @@
-import MySQLdb
+import mysql.connector as mydb
+import config
 
-conn = MySQLdb.connect(
-    host="localhost",
-    user="root",
-    password="kotaro0722",
-    db="test_debt"
+
+conn = mydb.connect(
+    host=config.HOST,
+    user=config.USER,
+    password=config.PASSWORD,
+    # port=config.PORT,
+    db="test"
 )
 
 cursor = conn.cursor()
 
 sql_create_table = "CREATE TABLE debt(id INT PRIMARY KEY,creditor VARCHAR(10),debtor VARCHAR(10),amount INT,ispay BOOLEAN)"
 sql_show_table = "SELECT * FROM debt"
-sql_insert_data = "INSERT INTO debt(id,creditor,debtor,amount,ispay) values(1,'kotaro','tomohisa','100',0)"
+sql_insert_data = "INSERT INTO debt(id,creditor,debtor,amount,ispay) values(1,'kotaro','tomohisa',100,0)"
 sql_alter_column1 = "ALTER TABLE debt MODIFY COLUMN id BIGINT"
 sql_alter_column2 = "ALTER TABLE debt MODIFY COLUMN creditor BIGINT, MODIFY COLUMN debtor BIGINT"
 sql_delete_data = "DELETE FROM debt WHERE id = 1;"
 sql_select_data = "SELECT debtor,amount,ispay FROM debt WHERE ispay=0 AND creditor=960825958208765973"
 
-cursor.execute(sql_select_data)
+cursor.execute(sql_insert_data)
 
 for row in cursor:
     print(row)
