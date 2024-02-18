@@ -32,7 +32,7 @@ def registerToDB(id, creditor, debtor, amount):
         db=dbName
     )
 
-    cursor = connect.cursor()
+    cursor = connect.cursor(dictionary=True)
 
     sql_insert_data = f"INSERT INTO {main_table}(id,creditor,debtor,amount,ispay) values({id},'{creditor}','{debtor}','{amount}',0)"
     cursor.execute(sql_insert_data)
