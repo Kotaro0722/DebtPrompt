@@ -1,5 +1,5 @@
 import discord
-import MySQLdb
+import mysql.connector as mydb
 import numpy as np
 import re
 from mydblib import my_select
@@ -24,7 +24,7 @@ register_channel_id = config.REGISTER_CHANNEL_ID
 
 
 def registerToDB(id, creditor, debtor, amount):
-    connect = MySQLdb.connect(
+    connect = mydb.connect(
         host=config.HOST,
         user=config.USER,
         password=config.PASSWORD,
