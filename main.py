@@ -23,18 +23,17 @@ main_table = config.MAIN_TABLE
 register_channel_id = config.REGISTER_CHANNEL_ID
 
 
-def registerToDB(id, creditor, debtor, amount):
+def registerToDB(id, creditor, debtor, amount, ispay):
     connect = mydb.connect(
         host=config.HOST,
         user=config.USER,
         password=config.PASSWORD,
-        port=config.PORT,
         db=dbName
     )
 
     cursor = connect.cursor(dictionary=True)
 
-    sql_insert_data = f"INSERT INTO {main_table}(id,creditor,debtor,amount,ispay) values({id},'{creditor}','{debtor}','{amount}',0)"
+    sql_insert_data = f"INSERT INTO {main_table}(id,creditor,debtor,amount,ispay) values({id},'{creditor}','{debtor}','{amount}',{ispay})"
     cursor.execute(sql_insert_data)
 
     connect.commit()
@@ -128,18 +127,39 @@ async def cancelAllPayDebt(message_id, channel):
         await message.remove_reaction("✅", client.user)
 
 
+async def scrollMessage(channel: discord.Thread):
+    async for message in channel.history(oldest_first=True, limit=None):
+        pattern_for_register = await getPatternIsRegister(message)
+        for_register = re.fullmatch(pattern_for_register, message.content)
+        if not message.author.bot and for_register:
+            is_register = False
+            is_pay = 0
+            for reaction in message.reactions:
+                if reaction.emoji == "⭕" and reaction.me:
+                    is_register = True
+                if reaction.emoji == "✅":
+                    is_pay = 1
+            if not is_register:
+                pattern_debtor_id = "[0-9]+"
+                debtor = re.findall(pattern_debtor_id, message.content)[0]
+                amount = re.findall(pattern_debtor_id, message.content)[1]
+                registerToDB(message.id, message.author.id,
+                             debtor, amount, is_pay)
+            await message.add_reaction("⭕")
+
+
 @client.event
 async def on_ready():
     print('We have logged in as {0.user}'.format(client))
 
 
 @client.event
-async def on_message(message):
+async def on_message(message: discord.Message):
     if message.author == client.user:
         return
 
     message_content = message.content
-    pattern_is_summon = "<@1095252448601456672>"
+    pattern_is_summon = f"<@{client.user.id}>"
     is_summon = re.match(pattern_is_summon, message_content)
     if is_summon:
         pattern_is_debtor = pattern_is_summon+r"\s*"+await getDebtor(message)
@@ -147,12 +167,20 @@ async def on_message(message):
 
         is_all_debt = re.fullmatch(pattern_is_summon, message_content)
 
+        pattern_is_scroll = f"<@{client.user.id}>"+r"\s*"+"scroll"
+        is_scroll = re.fullmatch(pattern_is_scroll, message_content)
+
         if is_all_debt:
             await showAllCredit(message.author.id, message)
 
         elif is_debtor:
             debtor = re.findall(r"[0-9]+", message_content)[1]
             await showOneCredit(message.author.id, debtor, message)
+
+        elif is_scroll:
+            register_channel = client.get_channel(int(register_channel_id))
+            await scrollMessage(register_channel)
+
         else:
             await message.channel.send("不正な入力です")
 
@@ -169,7 +197,7 @@ async def on_message(message):
 
         id = message.id
 
-        registerToDB(id, creditor, debtor, amount)
+        registerToDB(id, creditor, debtor, amount, 0)
         await message.add_reaction("⭕")
 
 
