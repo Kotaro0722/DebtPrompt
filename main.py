@@ -131,18 +131,14 @@ async def scrollMessage(channel: discord.Thread):
     async for message in channel.history(oldest_first=True, limit=None):
         pattern_for_register = await getPatternIsRegister(message)
         for_register = re.fullmatch(pattern_for_register, message.content)
-        # await message.remove_reaction("⭕", client.user)
         if not message.author.bot and for_register:
-            print(message.content)
             is_register = False
             is_pay = 0
             for reaction in message.reactions:
-                print(reaction)
                 if reaction.emoji == "⭕" and reaction.me:
                     is_register = True
                 if reaction.emoji == "✅":
                     is_pay = 1
-            print(is_pay)
             if not is_register:
                 pattern_debtor_id = "[0-9]+"
                 debtor = re.findall(pattern_debtor_id, message.content)[0]
@@ -183,9 +179,7 @@ async def on_message(message: discord.Message):
 
         elif is_scroll:
             register_channel = client.get_channel(int(register_channel_id))
-            print("scroll start")
             await scrollMessage(register_channel)
-            print("scroll end")
 
         else:
             await message.channel.send("不正な入力です")
