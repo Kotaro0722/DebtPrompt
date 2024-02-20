@@ -32,7 +32,7 @@ def registerToDB(id, creditor, debtor, amount):
         db=dbName
     )
 
-    cursor = connect.cursor()
+    cursor = connect.cursor(dictionary=True)
 
     sql_insert_data = f"INSERT INTO {main_table}(id,creditor,debtor,amount,ispay) values({id},'{creditor}','{debtor}','{amount}',0)"
     cursor.execute(sql_insert_data)
@@ -170,7 +170,7 @@ async def on_message(message):
         id = message.id
 
         registerToDB(id, creditor, debtor, amount)
-        await message.channel.send("登録できました")
+        await message.add_reaction("⭕")
 
 
 @client.event
@@ -192,7 +192,7 @@ async def on_raw_reaction_add(payload):
         await message.remove_reaction("✅", client.user)
         return
 
-    register_channel = client.get_channel(register_channel_id)
+    register_channel = client.get_channel(int(register_channel_id))
     if message.author.id == client.user.id:
         await payAllDebt(message.id, register_channel)
     else:
@@ -214,7 +214,7 @@ async def on_raw_reaction_remove(payload):
     if payload.emoji.name != "✅":
         return
 
-    register_channel = client.get_channel(register_channel_id)
+    register_channel = client.get_channel(int(register_channel_id))
     if message.author.id == client.user.id:
         await cancelAllPayDebt(message.id, register_channel)
     else:
