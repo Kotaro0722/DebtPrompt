@@ -152,7 +152,7 @@ async def showDetail(message: discord.Message):
     sql_string = f"SELECT * FROM sum_{message.id}"
     data = my_select(sql_string)
     for i in range(len(data)):
-        await message.channel.send(f"その{i+1}:{data.at[i,"id"]}")
+        await message.channel.send(f"[その{i+1}](<https://discord.com/channels/1205552823299866646/1098819625346682981/{data[i:i+1].index[0]}>)")
 
 
 @client.event
