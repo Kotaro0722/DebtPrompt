@@ -148,6 +148,13 @@ async def scrollMessage(channel: discord.Thread):
             await message.add_reaction("⭕")
 
 
+async def showDetail(message_id: discord.Message, channel):
+    sql_string = f"SELECT * FROM sum_{message_id}"
+    data = my_select(dbName, sql_string)
+    for i in range(len(data)):
+        await channel.send(f"[その{i+1}](<https://discord.com/channels/963060474646257675/1098819625346682981/{data.at[i,'id']}>)")
+
+
 @client.event
 async def on_ready():
     print('We have logged in as {0.user}'.format(client))
@@ -202,7 +209,7 @@ async def on_message(message: discord.Message):
 
 
 @client.event
-async def on_raw_reaction_add(payload):
+async def on_raw_reaction_add(payload: discord.RawReactionActionEvent):
     txt_channel = client.get_channel(payload.channel_id)
     message = await txt_channel.fetch_message(payload.message_id)
     user = payload.user_id
@@ -213,18 +220,19 @@ async def on_raw_reaction_add(payload):
     if message.author.id != payload.user_id and message.author.id != client.user.id:
         return
 
-    if payload.emoji.name != "✅":
-        return
+    if payload.emoji.name == "✅":
+        if list(filter(lambda rea: rea.emoji == "✅", message.reactions))[0].me:
+            await message.remove_reaction("✅", client.user)
+            return
 
-    if list(filter(lambda rea: rea.emoji == "✅", message.reactions))[0].me:
-        await message.remove_reaction("✅", client.user)
-        return
+        register_channel = client.get_channel(int(register_channel_id))
+        if message.author.id == client.user.id:
+            await payAllDebt(message.id, register_channel)
+        else:
+            payOneDebt(message.id)
 
-    register_channel = client.get_channel(int(register_channel_id))
-    if message.author.id == client.user.id:
-        await payAllDebt(message.id, register_channel)
-    else:
-        payOneDebt(message.id)
+    if payload.emoji.name == "❔":
+        await showDetail(payload.message_id, txt_channel)
 
 
 @client.event
