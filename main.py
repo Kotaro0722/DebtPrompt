@@ -148,11 +148,11 @@ async def scrollMessage(channel: discord.Thread):
             await message.add_reaction("⭕")
 
 
-async def showDetail(message: discord.Message):
-    sql_string = f"SELECT * FROM sum_{message.id}"
+async def showDetail(message_id: discord.Message, channel):
+    sql_string = f"SELECT * FROM sum_{message_id}"
     data = my_select(sql_string)
     for i in range(len(data)):
-        await message.channel.send(f"[その{i+1}](<https://discord.com/channels/1205552823299866646/1098819625346682981/{data[i:i+1].index[0]}>)")
+        await channel.send(f"[その{i+1}](<https://discord.com/channels/1205552823299866646/1098819625346682981/{data[i:i+1].index[0]}>)")
 
 
 @client.event
@@ -232,7 +232,7 @@ async def on_raw_reaction_add(payload: discord.RawReactionActionEvent):
             payOneDebt(message.id)
 
     if payload.emoji.name == "❔":
-        await showDetail(payload.message_id)
+        await showDetail(payload.message_id, txt_channel)
 
 
 @client.event
