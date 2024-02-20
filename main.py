@@ -170,7 +170,7 @@ async def on_message(message):
         id = message.id
 
         registerToDB(id, creditor, debtor, amount)
-        await message.channel.send("登録できました")
+        await message.add_reaction("⭕")
 
 
 @client.event
