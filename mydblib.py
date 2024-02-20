@@ -10,7 +10,6 @@ def my_select(db, sql_string):
             host=config.HOST,
             user=config.USER,
             password=config.PASSWORD,
-            port=config.PORT,
             database=db
         )
         cursor = dbcon.cursor(dictionary=True)

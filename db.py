@@ -7,7 +7,6 @@ conn = mydb.connect(
     host=config.HOST,
     user=config.USER,
     password=config.PASSWORD,
-    port=config.PORT,
     db=config.DBNAME
 )
 
