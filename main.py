@@ -128,18 +128,34 @@ async def cancelAllPayDebt(message_id, channel):
         await message.remove_reaction("✅", client.user)
 
 
+async def scrollMessage(channel: discord.Thread):
+    async for message in channel.history():
+        is_register = False
+        is_pay = False
+        for reaction in message.reactions:
+            if reaction.emoji == "⭕" and reaction.me:
+                is_register = True
+            if reaction.emoji == "✅":
+                is_pay = True
+        if not is_register:
+            pattern_debtor_id = "[0-9]+"
+            debtor = re.findall(pattern_debtor_id, message.content)[0]
+            registerToDB(message.id, message.author.id, debtor, is_pay)
+    print("scroll end")
+
+
 @client.event
 async def on_ready():
     print('We have logged in as {0.user}'.format(client))
 
 
 @client.event
-async def on_message(message):
+async def on_message(message: discord.Message):
     if message.author == client.user:
         return
 
     message_content = message.content
-    pattern_is_summon = "<@1095252448601456672>"
+    pattern_is_summon = f"<{client.user.id}>"
     is_summon = re.match(pattern_is_summon, message_content)
     if is_summon:
         pattern_is_debtor = pattern_is_summon+r"\s*"+await getDebtor(message)
@@ -171,6 +187,13 @@ async def on_message(message):
 
         registerToDB(id, creditor, debtor, amount)
         await message.add_reaction("⭕")
+        await message.channel.send(message.reactions)
+
+    pattern_is_scroll = f"<{client.user.id}> scroll"
+    is_scroll = re.fullmatch(pattern_is_scroll, message_content)
+    if is_scroll:
+        await scrollMessage(message.channel)
+        print("scroll start")
 
 
 @client.event
