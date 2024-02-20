@@ -128,9 +128,9 @@ async def cancelAllPayDebt(message_id, channel):
 
 
 async def scrollMessage(channel: discord.Thread):
-    pattern_for_register = await getPatternIsRegister(message)
-    for_register = re.fullmatch(pattern_for_register, message.content)
     async for message in channel.history(oldest_first=True, limit=None):
+        pattern_for_register = await getPatternIsRegister(message)
+        for_register = re.fullmatch(pattern_for_register, message.content)
         # await message.remove_reaction("⭕", client.user)
         if not message.author.bot and for_register:
             print(message.content)
