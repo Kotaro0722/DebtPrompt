@@ -150,7 +150,7 @@ async def scrollMessage(channel: discord.Thread):
 
 async def showDetail(message_id: discord.Message, channel):
     sql_string = f"SELECT * FROM sum_{message_id}"
-    data = my_select(sql_string)
+    data = my_select(dbName, sql_string)
     for i in range(len(data)):
         await channel.send(f"[その{i+1}](<https://discord.com/channels/1205552823299866646/1098819625346682981/{data[i:i+1].index[0]}>)")
 
