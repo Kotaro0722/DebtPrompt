@@ -231,7 +231,7 @@ async def on_raw_reaction_add(payload: discord.RawReactionActionEvent):
         else:
             payOneDebt(message.id)
 
-    if payload.emoji.name == "❔":
+    if payload.emoji.name == "❔" and client.user.id == message.author.id:
         await showDetail(payload.message_id, txt_channel)
 
 
