@@ -209,7 +209,3 @@
 ### タスク登録リスト
 
 | id | threadid | deadline |
-
-### スレッドリスト
-
-| threadid |
