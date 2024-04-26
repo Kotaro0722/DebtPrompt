@@ -154,6 +154,12 @@ async def showDetail(message_id: discord.Message, channel):
     for i in range(len(data)):
         await channel.send(f"[その{i+1}](<https://discord.com/channels/963060474646257675/1098819625346682981/{data.at[i,'id']}>)")
 
+async def deleteCircle(channel: discord.Thread):
+    async for message in channel.history(oldest_first=True, limit=None):
+        try:
+            await message.clear_reaction("⭕")
+        except Exception as e:
+            print(e)
 
 @client.event
 async def on_ready():
@@ -176,6 +182,9 @@ async def on_message(message: discord.Message):
 
         pattern_is_scroll = f"<@{client.user.id}>"+r"\s*"+"scroll"
         is_scroll = re.fullmatch(pattern_is_scroll, message_content)
+        
+        pattern_is_delete=f"<@{client.user.id}>"+r"\s*"+"delete"
+        is_delete=re.fullmatch(pattern_is_scroll, message_content)
 
         if is_all_debt:
             await showAllCredit(message.author.id, message)
@@ -187,6 +196,9 @@ async def on_message(message: discord.Message):
         elif is_scroll:
             register_channel = client.get_channel(int(register_channel_id))
             await scrollMessage(register_channel)
+            
+        elif is_delete:
+            register_channel = client.get_channel(int(register_channel_id))
 
         else:
             await message.channel.send("不正な入力です")
