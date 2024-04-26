@@ -12,6 +12,7 @@ conn = mydb.connect(
 
 cursor = conn.cursor()
 
+
 sql_create_table = "CREATE TABLE debt(id BIGINT PRIMARY KEY,creditor BIGINT,debtor BIGINT,amount INT,ispay BOOLEAN)"
 sql_show_table = "SELECT * FROM debt"
 sql_show_table_detail = "SHOW COLUMNS FROM debt"
