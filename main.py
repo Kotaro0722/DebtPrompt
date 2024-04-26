@@ -157,7 +157,7 @@ async def showDetail(message_id: discord.Message, channel):
 async def deleteCircle(channel: discord.Thread):
     async for message in channel.history(oldest_first=True, limit=None):
         try:
-            await message.clear_reaction("⭕")
+            await message.remove_reaction("⭕")
         except Exception as e:
             print(e)
 
