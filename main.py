@@ -184,7 +184,7 @@ async def on_message(message: discord.Message):
         is_scroll = re.fullmatch(pattern_is_scroll, message_content)
         
         pattern_is_delete=f"<@{client.user.id}>"+r"\s*"+"delete"
-        is_delete=re.fullmatch(pattern_is_scroll, message_content)
+        is_delete=re.fullmatch(pattern_is_delete, message_content)
 
         if is_all_debt:
             await showAllCredit(message.author.id, message)
