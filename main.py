@@ -1,8 +1,7 @@
 import discord
-import numpy as np
-import re
 import config
-from debtManager import debt_manager_on_message ,debt_manager_on_raw_reaction_add,debt_manager_on_raw_reaction_remove
+from debtManager import debt_manager_on_message, debt_manager_on_raw_reaction_add, debt_manager_on_raw_reaction_remove
+from taskManager import task_manager_on_message
 
 Token = config.TOKEN
 
@@ -23,14 +22,17 @@ async def on_ready():
 
 @client.event
 async def on_message(message: discord.Message):
-    await debt_manager_on_message(message,client)
+    await debt_manager_on_message(message, client)
+    await task_manager_on_message(message, client)
+
 
 @client.event
 async def on_raw_reaction_add(payload: discord.RawReactionActionEvent):
-    await debt_manager_on_raw_reaction_add(payload,client)
+    await debt_manager_on_raw_reaction_add(payload, client)
+
 
 @client.event
 async def on_raw_reaction_remove(payload):
-    await debt_manager_on_raw_reaction_remove(payload,client)
+    await debt_manager_on_raw_reaction_remove(payload, client)
 
 client.run(Token)

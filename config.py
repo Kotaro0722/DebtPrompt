@@ -11,5 +11,6 @@ PORT = os.getenv("PORT")
 
 DBNAME = os.getenv("DBNAME")
 MAIN_TABLE = os.getenv("MAIN_TABLE")
+TASK_TABLE = os.getenv("TASK_TABLE")
 
 REGISTER_CHANNEL_ID = os.getenv("REGISTER_CHANNEL_ID")

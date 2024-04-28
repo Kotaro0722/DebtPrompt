@@ -208,4 +208,4 @@
 
 ### タスク登録リスト
 
-| id | threadid | deadline |
+| message_id | thread_id | deadline |
