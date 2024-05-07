@@ -10,5 +10,7 @@ services:
     environment:
       MARIADB_DATABASE: debt
       MARIADB_ROOT_PASSWORD: pass
+      TZ: Asia/Tokyo
     volumes:
       - ./volume:/var/lib/mysql
+      - /home/kotaro/TaskManager/initdb.d:/docker-entrypoint-initdb.d:rw
