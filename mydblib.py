@@ -20,6 +20,8 @@ def my_select(db, sql_string):
     try:
         cursor.execute(sql_string)
         recset = cursor.fetchall()
+        cursor.close()
+        dbcon.close()
     except mydb.Error as e:
         print(f"クエリ実行でエラー発生\n{e}")
         print(f"入力されたSQLは\n{sql_string}")
