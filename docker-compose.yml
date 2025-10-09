@@ -5,6 +5,10 @@ services:
     restart: always
     depends_on:
       - "db"
+    volumes:
+      - .:/bot
+    environment:
+      - PYTHONUNBUFFERED=1
   db:
     image: mariadb:11.3.2
     environment:
