@@ -95,7 +95,7 @@ async def getDebtor(message):
 
 async def getPatternIsRegister(message):
     pattern = await getDebtor(message)
-    pattern += r"\s*[0-9]+円\s*.*"
+    pattern += r"\s*-?[0-9]+円\s*.*"
     return pattern
 
 
@@ -182,7 +182,7 @@ async def on_message(message: discord.Message):
 
         pattern_is_scroll = f"<@{client.user.id}>"+r"\s*"+"scroll"
         is_scroll = re.fullmatch(pattern_is_scroll, message_content)
-        
+
         pattern_is_delete=f"<@{client.user.id}>"+r"\s*"+"delete"
         is_delete=re.fullmatch(pattern_is_delete, message_content)
 
@@ -196,7 +196,7 @@ async def on_message(message: discord.Message):
         elif is_scroll:
             register_channel = client.get_channel(int(register_channel_id))
             await scrollMessage(register_channel)
-            
+
         elif is_delete:
             register_channel = client.get_channel(int(register_channel_id))
 
@@ -206,7 +206,7 @@ async def on_message(message: discord.Message):
     pattern_is_register = await getPatternIsRegister(message)
     is_register = re.fullmatch(pattern_is_register, message_content)
     if is_register:
-        pattern_debtor_id = "[0-9]+"
+        pattern_debtor_id = "-?[0-9]+"
         debtor = re.findall(pattern_debtor_id, message_content)[0]
 
         creditor = message.author.id
