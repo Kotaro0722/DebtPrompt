@@ -170,14 +170,14 @@ async def on_ready():
             `amount` INT,
             `ispay` BOOLEAN
         )"""
-    my_update(dbName,debt_table_create_sql)
+    my_update(debt_table_create_sql)
     total_table_create_sql="""
         CREATE TABLE IF NOT EXISTS total(
             `id` BIGINT PRIMARY KEY,
             `message_id` BIGINT,
             `debt_id` BIGINT
         )"""
-    my_update(dbName,total_table_create_sql)
+    my_update(total_table_create_sql)
 
 
 @client.event
