@@ -2,8 +2,8 @@ import discord
 import mysql.connector as mydb
 import numpy as np
 import re
-from db.my_select import my_select
-from db.my_update import my_update
+from db.db_select import my_select
+from db.db_select import my_update
 import config
 
 Token = config.TOKEN
