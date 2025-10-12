@@ -3,5 +3,5 @@
     "editor.defaultFormatter": "ms-python.autopep8"
   },
   "python.formatting.provider": "none",
-  "cSpell.words": ["ispay", "mydb", "mydblib"]
+  "cSpell.words": ["dbcon", "dbconfig", "ispay", "mydb", "mydblib", "recset"]
 }
