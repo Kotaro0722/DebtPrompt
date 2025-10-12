@@ -24,7 +24,7 @@ sql_select_data = "SELECT debtor,amount,ispay FROM debt WHERE ispay=0 AND credit
 sql_delete_table = "DROP TABLE debt"
 sql_delete_table_2 = "DROP TABLE sum_1209423440495509504"
 
-cursor.execute(sql_create_table)
+# cursor.execute(sql_create_table)
 
 for row in cursor:
     print(row)
