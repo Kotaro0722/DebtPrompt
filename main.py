@@ -23,7 +23,7 @@ main_table = config.MAIN_TABLE
 register_channel_id = config.REGISTER_CHANNEL_ID
 
 
-def registerToDB(id, creditor, debtor, amount, ispay):
+def register_to_DB(id, creditor, debtor, amount, ispay):
     connect = mydb.connect(
         host=config.HOST,
         user=config.USER,
@@ -42,7 +42,7 @@ def registerToDB(id, creditor, debtor, amount, ispay):
     connect.close()
 
 
-async def showAllCredit(creditor, message):
+async def show_all_credit(creditor, message):
     sql_string = f"SELECT debtor,amount FROM {main_table} WHERE creditor={creditor} AND ispay=0"
     data = my_select(sql_string)
     sum = data.groupby("debtor").sum(numeric_only=True)
@@ -54,7 +54,7 @@ async def showAllCredit(creditor, message):
         create_total(message_send.id, data)
 
 
-async def showOneCredit(creditor, debtor, message):
+async def show_one_credit(creditor, debtor, message):
     sql_string = f"SELECT amount FROM {main_table} WHERE creditor={creditor} AND debtor={debtor} AND ispay=0;"
     data = my_select(sql_string)
     sum = data.sum(numeric_only=True)
@@ -71,7 +71,7 @@ def create_total(message_id, debt_ids):
         my_update(sql_string)
 
 
-async def getMemberList(message):
+async def get_member_list(message):
     guild = client.get_guild(message.guild.id)
     members = guild._members
     memberList = []
@@ -81,8 +81,8 @@ async def getMemberList(message):
     return memberList
 
 
-async def getDebtor(message):
-    list_party = await getMemberList(message)
+async def get_debtor(message):
+    list_party = await get_member_list(message)
     pattern = "("
     for id in list_party:
         pattern += f"<@{id}>|"
@@ -91,43 +91,43 @@ async def getDebtor(message):
     return pattern
 
 
-async def getPatternIsRegister(message):
-    pattern = await getDebtor(message)
+async def get_pattern_is_register(message):
+    pattern = await get_debtor(message)
     pattern += r"\s*-?[0-9]+円\s*.*"
     return pattern
 
 
-def payOneDebt(message_id):
+def pay_one_debt(message_id):
     sql_string = f"UPDATE {main_table} SET ispay=1 WHERE id={message_id}"
     my_update(sql_string)
 
 
-async def payAllDebt(message_id, channel):
+async def pay_all_debt(message_id, channel):
     sql_string = f"SELECT * FROM total WHERE message_id={message_id}"
     data = my_select(sql_string)
     for i in range(len(data)):
-        payOneDebt(data.at[i, "debt_id"])
+        pay_one_debt(data.at[i, "debt_id"])
         message = await channel.fetch_message(data.at[i, "debt_id"])
         await message.add_reaction("✅")
 
 
-def cancelOnePayDebt(message_id):
+def cancel_one_pay_debt(message_id):
     sql_string = f"UPDATE {main_table} SET ispay=0 WHERE id={message_id}"
     my_update(sql_string)
 
 
-async def cancelAllPayDebt(message_id, channel):
+async def cancel_all_pay_debt(message_id, channel):
     sql_string = f"SELECT * FROM total WHERE message_id={message_id}"
     data = my_select(sql_string)
     for i in range(len(data)):
-        cancelOnePayDebt(data.at[i, "debt_id"])
+        cancel_one_pay_debt(data.at[i, "debt_id"])
         message = await channel.fetch_message(data.at[i, "debt_id"])
         await message.remove_reaction("✅", client.user)
 
 
-async def scrollMessage(channel: discord.Thread):
+async def scroll_message(channel: discord.Thread):
     async for message in channel.history(oldest_first=True, limit=None):
-        pattern_for_register = await getPatternIsRegister(message)
+        pattern_for_register = await get_pattern_is_register(message)
         for_register = re.fullmatch(pattern_for_register, message.content)
         if not message.author.bot and for_register:
             is_register = False
@@ -141,18 +141,19 @@ async def scrollMessage(channel: discord.Thread):
                 pattern_debtor_id = "[0-9]+"
                 debtor = re.findall(pattern_debtor_id, message.content)[0]
                 amount = re.findall(pattern_debtor_id, message.content)[1]
-                registerToDB(message.id, message.author.id,
+                register_to_DB(message.id, message.author.id,
                              debtor, amount, is_pay)
             await message.add_reaction("⭕")
 
 
-async def showDetail(message_id: discord.Message, channel):
+async def show_detail(message_id: discord.Message, channel):
     sql_string = f"SELECT * FROM total WHERE message_id={message_id}"
     data = my_select(sql_string)
     for i in range(len(data)):
         await channel.send(f"[その{i+1}](<https://discord.com/channels/963060474646257675/1098819625346682981/{data.at[i,'debt_id']}>)")
 
-async def deleteCircle(channel: discord.Thread):
+
+async def delete_circle(channel: discord.Thread):
     async for message in channel.history(oldest_first=True, limit=None):
         try:
             await message.remove_reaction("⭕")
@@ -189,7 +190,7 @@ async def on_message(message: discord.Message):
     pattern_is_summon = f"<@{client.user.id}>"
     is_summon = re.match(pattern_is_summon, message_content)
     if is_summon:
-        pattern_is_debtor = pattern_is_summon+r"\s*"+await getDebtor(message)
+        pattern_is_debtor = pattern_is_summon+r"\s*"+await get_debtor(message)
         is_debtor = re.fullmatch(pattern_is_debtor, message_content)
 
         is_all_debt = re.fullmatch(pattern_is_summon, message_content)
@@ -201,15 +202,15 @@ async def on_message(message: discord.Message):
         is_delete=re.fullmatch(pattern_is_delete, message_content)
 
         if is_all_debt:
-            await showAllCredit(message.author.id, message)
+            await show_all_credit(message.author.id, message)
 
         elif is_debtor:
             debtor = re.findall(r"[0-9]+", message_content)[1]
-            await showOneCredit(message.author.id, debtor, message)
+            await show_one_credit(message.author.id, debtor, message)
 
         elif is_scroll:
             register_channel = client.get_channel(int(register_channel_id))
-            await scrollMessage(register_channel)
+            await scroll_message(register_channel)
 
         elif is_delete:
             register_channel = client.get_channel(int(register_channel_id))
@@ -217,7 +218,7 @@ async def on_message(message: discord.Message):
         else:
             await message.channel.send("不正な入力です")
 
-    pattern_is_register = await getPatternIsRegister(message)
+    pattern_is_register = await get_pattern_is_register(message)
     is_register = re.fullmatch(pattern_is_register, message_content)
     if is_register:
         pattern_debtor_id = "-?[0-9]+"
@@ -230,7 +231,7 @@ async def on_message(message: discord.Message):
 
         id = message.id
 
-        registerToDB(id, creditor, debtor, amount, 0)
+        register_to_DB(id, creditor, debtor, amount, 0)
         await message.add_reaction("⭕")
 
 
@@ -253,12 +254,12 @@ async def on_raw_reaction_add(payload: discord.RawReactionActionEvent):
 
         register_channel = client.get_channel(int(register_channel_id))
         if message.author.id == client.user.id:
-            await payAllDebt(message.id, register_channel)
+            await pay_all_debt(message.id, register_channel)
         else:
-            payOneDebt(message.id)
+            pay_one_debt(message.id)
 
     if payload.emoji.name == "❔" and client.user.id == message.author.id:
-        await showDetail(payload.message_id, txt_channel)
+        await show_detail(payload.message_id, txt_channel)
 
 
 @client.event
@@ -278,8 +279,8 @@ async def on_raw_reaction_remove(payload):
 
     register_channel = client.get_channel(int(register_channel_id))
     if message.author.id == client.user.id:
-        await cancelAllPayDebt(message.id, register_channel)
+        await cancel_all_pay_debt(message.id, register_channel)
     else:
-        cancelOnePayDebt(message.id)
+        cancel_one_pay_debt(message.id)
 
 client.run(Token)
