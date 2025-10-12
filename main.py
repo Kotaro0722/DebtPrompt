@@ -51,7 +51,7 @@ async def showAllCredit(creditor, message):
 
         sql_string = f"SELECT id FROM {main_table} WHERE creditor={creditor} AND debtor={sum[i:i+1].index[0]} AND ispay=0;"
         data = my_select(dbName, sql_string)
-        create_sum(message_send.id, data)
+        create_total(message_send.id, data)
 
 
 async def showOneCredit(creditor, debtor, message):
@@ -62,10 +62,10 @@ async def showOneCredit(creditor, debtor, message):
 
     sql_string = f"SELECT id FROM {main_table} WHERE creditor={creditor} AND debtor={debtor} AND ispay=0;"
     data = my_select(dbName, sql_string)
-    create_sum(message_send.id, data)
+    create_total(message_send.id, data)
 
 
-def create_sum(message_id, debt_ids):
+def create_total(message_id, debt_ids):
     for debt_id in debt_ids["id"].tolist():
         sql_string = f"INSERT INTO total (message_id,debt_id) VALUES ({message_id},{debt_id})"
         my_update(dbName, sql_string)
