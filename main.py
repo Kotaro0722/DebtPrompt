@@ -24,22 +24,8 @@ register_channel_id = config.REGISTER_CHANNEL_ID
 
 
 def register_to_DB(id, creditor, debtor, amount, ispay):
-    connect = mydb.connect(
-        host=config.HOST,
-        user=config.USER,
-        password=config.PASSWORD,
-        db=dbName
-    )
-
-    cursor = connect.cursor(dictionary=True)
-
     sql_insert_data = f"INSERT INTO {main_table}(id,creditor,debtor,amount,ispay) values({id},'{creditor}','{debtor}','{amount}',{ispay})"
-    cursor.execute(sql_insert_data)
-
-    connect.commit()
-
-    cursor.close()
-    connect.close()
+    my_update(sql_insert_data)
 
 
 async def show_all_credit(creditor, message):
