@@ -51,7 +51,7 @@ async def showAllCredit(creditor, message):
 
         sql_string = f"SELECT id FROM {main_table} WHERE creditor={creditor} AND debtor={sum[i:i+1].index[0]} AND ispay=0;"
         data = my_select(dbName, sql_string)
-        createNewTable(message_send.id, data)
+        create_sum(message_send.id, data)
 
 
 async def showOneCredit(creditor, debtor, message):
@@ -62,15 +62,13 @@ async def showOneCredit(creditor, debtor, message):
 
     sql_string = f"SELECT id FROM {main_table} WHERE creditor={creditor} AND debtor={debtor} AND ispay=0;"
     data = my_select(dbName, sql_string)
-    createNewTable(message_send.id, data)
+    create_sum(message_send.id, data)
 
 
-def createNewTable(message_id, data):
-    sql_string = f"CREATE TABLE sum_{message_id}(id VARCHAR(20) PRIMARY KEY);"
-    my_update(dbName, sql_string)
-    for i in range(len(data)):
-        sql_insert_data = f"INSERT INTO sum_{message_id}(id) values({data.at[i,'id']});"
-        my_update(dbName, sql_insert_data)
+def create_sum(message_id, debt_ids):
+    for debt_id in debt_ids["id"].tolist():
+        sql_string = f"INSERT INTO total (message_id,debt_id) VALUES ({message_id},{debt_id})"
+        my_update(dbName, sql_string)
 
 
 async def getMemberList(message):
@@ -105,11 +103,11 @@ def payOneDebt(message_id):
 
 
 async def payAllDebt(message_id, channel):
-    sql_string = f"SELECT * FROM sum_{message_id}"
+    sql_string = f"SELECT * FROM total WHERE message_id={message_id}"
     data = my_select(dbName, sql_string)
     for i in range(len(data)):
-        payOneDebt(data.at[i, "id"])
-        message = await channel.fetch_message(data.at[i, "id"])
+        payOneDebt(data.at[i, "debt_id"])
+        message = await channel.fetch_message(data.at[i, "debt_id"])
         await message.add_reaction("✅")
 
 
@@ -119,11 +117,11 @@ def cancelOnePayDebt(message_id):
 
 
 async def cancelAllPayDebt(message_id, channel):
-    sql_string = f"SELECT * FROM sum_{message_id}"
+    sql_string = f"SELECT * FROM total WHERE message_id={message_id}"
     data = my_select(dbName, sql_string)
     for i in range(len(data)):
-        cancelOnePayDebt(data.at[i, "id"])
-        message = await channel.fetch_message(data.at[i, "id"])
+        cancelOnePayDebt(data.at[i, "debt_id"])
+        message = await channel.fetch_message(data.at[i, "debt_id"])
         await message.remove_reaction("✅", client.user)
 
 
@@ -149,10 +147,10 @@ async def scrollMessage(channel: discord.Thread):
 
 
 async def showDetail(message_id: discord.Message, channel):
-    sql_string = f"SELECT * FROM sum_{message_id}"
+    sql_string = f"SELECT * FROM total WHERE message_id={message_id}"
     data = my_select(dbName, sql_string)
     for i in range(len(data)):
-        await channel.send(f"[その{i+1}](<https://discord.com/channels/963060474646257675/1098819625346682981/{data.at[i,'id']}>)")
+        await channel.send(f"[その{i+1}](<https://discord.com/channels/963060474646257675/1098819625346682981/{data.at[i,'debt_id']}>)")
 
 async def deleteCircle(channel: discord.Thread):
     async for message in channel.history(oldest_first=True, limit=None):
@@ -164,6 +162,22 @@ async def deleteCircle(channel: discord.Thread):
 @client.event
 async def on_ready():
     print('We have logged in as {0.user}'.format(client))
+    debt_table_create_sql="""
+        CREATE TABLE IF NOT EXISTS debt(
+            `id` BIGINT PRIMARY KEY,
+            `creditor` BIGINT,
+            `debtor` BIGINT,
+            `amount` INT,
+            `ispay` BOOLEAN
+        )"""
+    my_update(dbName,debt_table_create_sql)
+    total_table_create_sql="""
+        CREATE TABLE IF NOT EXISTS total(
+            `id` BIGINT PRIMARY KEY,
+            `message_id` BIGINT,
+            `debt_id` BIGINT
+        )"""
+    my_update(dbName,total_table_create_sql)
 
 
 @client.event
