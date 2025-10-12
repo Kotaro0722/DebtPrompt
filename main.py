@@ -2,8 +2,8 @@ import discord
 import mysql.connector as mydb
 import numpy as np
 import re
-from mydblib import my_select
-from mydblib2 import my_update
+from db.db_select import my_select
+from db.db_update import my_update
 import config
 
 Token = config.TOKEN
@@ -44,31 +44,31 @@ def registerToDB(id, creditor, debtor, amount, ispay):
 
 async def showAllCredit(creditor, message):
     sql_string = f"SELECT debtor,amount FROM {main_table} WHERE creditor={creditor} AND ispay=0"
-    data = my_select(dbName, sql_string)
+    data = my_select(sql_string)
     sum = data.groupby("debtor").sum(numeric_only=True)
     for i in range(len(sum)):
         message_send = await message.channel.send(f"<@{sum[i:i+1].index[0]}>:{sum[i:i+1]['amount'].iloc[-1]}円")
 
         sql_string = f"SELECT id FROM {main_table} WHERE creditor={creditor} AND debtor={sum[i:i+1].index[0]} AND ispay=0;"
-        data = my_select(dbName, sql_string)
+        data = my_select(sql_string)
         create_total(message_send.id, data)
 
 
 async def showOneCredit(creditor, debtor, message):
     sql_string = f"SELECT amount FROM {main_table} WHERE creditor={creditor} AND debtor={debtor} AND ispay=0;"
-    data = my_select(dbName, sql_string)
+    data = my_select(sql_string)
     sum = data.sum(numeric_only=True)
     message_send = await message.channel.send(f"<@{debtor}>:{sum.iloc[-1]}円")
 
     sql_string = f"SELECT id FROM {main_table} WHERE creditor={creditor} AND debtor={debtor} AND ispay=0;"
-    data = my_select(dbName, sql_string)
+    data = my_select(sql_string)
     create_total(message_send.id, data)
 
 
 def create_total(message_id, debt_ids):
     for debt_id in debt_ids["id"].tolist():
         sql_string = f"INSERT INTO total (message_id,debt_id) VALUES ({message_id},{debt_id})"
-        my_update(dbName, sql_string)
+        my_update(sql_string)
 
 
 async def getMemberList(message):
@@ -99,12 +99,12 @@ async def getPatternIsRegister(message):
 
 def payOneDebt(message_id):
     sql_string = f"UPDATE {main_table} SET ispay=1 WHERE id={message_id}"
-    my_update(dbName, sql_string)
+    my_update(sql_string)
 
 
 async def payAllDebt(message_id, channel):
     sql_string = f"SELECT * FROM total WHERE message_id={message_id}"
-    data = my_select(dbName, sql_string)
+    data = my_select(sql_string)
     for i in range(len(data)):
         payOneDebt(data.at[i, "debt_id"])
         message = await channel.fetch_message(data.at[i, "debt_id"])
@@ -113,12 +113,12 @@ async def payAllDebt(message_id, channel):
 
 def cancelOnePayDebt(message_id):
     sql_string = f"UPDATE {main_table} SET ispay=0 WHERE id={message_id}"
-    my_update(dbName, sql_string)
+    my_update(sql_string)
 
 
 async def cancelAllPayDebt(message_id, channel):
     sql_string = f"SELECT * FROM total WHERE message_id={message_id}"
-    data = my_select(dbName, sql_string)
+    data = my_select(sql_string)
     for i in range(len(data)):
         cancelOnePayDebt(data.at[i, "debt_id"])
         message = await channel.fetch_message(data.at[i, "debt_id"])
@@ -148,7 +148,7 @@ async def scrollMessage(channel: discord.Thread):
 
 async def showDetail(message_id: discord.Message, channel):
     sql_string = f"SELECT * FROM total WHERE message_id={message_id}"
-    data = my_select(dbName, sql_string)
+    data = my_select(sql_string)
     for i in range(len(data)):
         await channel.send(f"[その{i+1}](<https://discord.com/channels/963060474646257675/1098819625346682981/{data.at[i,'debt_id']}>)")
 
@@ -170,14 +170,14 @@ async def on_ready():
             `amount` INT,
             `ispay` BOOLEAN
         )"""
-    my_update(dbName,debt_table_create_sql)
+    my_update(debt_table_create_sql)
     total_table_create_sql="""
         CREATE TABLE IF NOT EXISTS total(
             `id` BIGINT PRIMARY KEY,
             `message_id` BIGINT,
             `debt_id` BIGINT
         )"""
-    my_update(dbName,total_table_create_sql)
+    my_update(total_table_create_sql)
 
 
 @client.event
