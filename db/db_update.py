@@ -1,5 +1,5 @@
 import mysql.connector as mydb
-from db_pool import connection_pool
+from db.db_pool import connection_pool
 import sys
 
 
