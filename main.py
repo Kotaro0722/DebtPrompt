@@ -33,7 +33,8 @@ async def show_all_credit(creditor, message):
     data = my_select(sql_string)
     sum = data.groupby("debtor").sum(numeric_only=True)
     for i in range(len(sum)):
-        message_send = await message.channel.send(f"<@{sum[i:i+1].index[0]}>:{sum[i:i+1]['amount'].iloc[-1]}円")
+        debtor_user = await client.fetch_user(sum[i:i+1].index[0])
+        message_send = await message.channel.send(f"{debtor_user.mention}:{sum[i:i+1]['amount'].iloc[-1]}円")
 
         sql_string = f"SELECT id FROM {main_table} WHERE creditor={creditor} AND debtor={sum[i:i+1].index[0]} AND ispay=0;"
         data = my_select(sql_string)
@@ -44,7 +45,8 @@ async def show_one_credit(creditor, debtor, message):
     sql_string = f"SELECT amount FROM {main_table} WHERE creditor={creditor} AND debtor={debtor} AND ispay=0;"
     data = my_select(sql_string)
     sum = data.sum(numeric_only=True)
-    message_send = await message.channel.send(f"<@{debtor}>:{sum.iloc[-1]}円")
+    debtor_user=await client.fetch_user(debtor)
+    message_send = await message.channel.send(f"{debtor_user.mention} {sum.iloc[-1]}円")
 
     sql_string = f"SELECT id FROM {main_table} WHERE creditor={creditor} AND debtor={debtor} AND ispay=0;"
     data = my_select(sql_string)
@@ -60,10 +62,7 @@ def create_total(message_id, debt_ids):
 async def get_member_list(message):
     guild = client.get_guild(message.guild.id)
     members = guild._members
-    memberList = []
-    for member in members.values():
-        if not member.bot:
-            memberList.append(member.id)
+    memberList = [member.id for member in members.values() if not member.bot]
     return memberList
 
 
@@ -160,7 +159,7 @@ async def on_ready():
     my_update(debt_table_create_sql)
     total_table_create_sql="""
         CREATE TABLE IF NOT EXISTS total(
-            `id` BIGINT PRIMARY KEY,
+            `id` BIGINT PRIMARY KEY AUTO_INCREMENT,
             `message_id` BIGINT,
             `debt_id` BIGINT
         )"""
