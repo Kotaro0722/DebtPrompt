@@ -173,7 +173,7 @@ async def on_ready():
     my_update(debt_table_create_sql)
     total_table_create_sql="""
         CREATE TABLE IF NOT EXISTS total(
-            `id` BIGINT PRIMARY KEY,
+            `id` BIGINT PRIMARY KEY AUTO_INCREMENT,
             `message_id` BIGINT,
             `debt_id` BIGINT
         )"""
