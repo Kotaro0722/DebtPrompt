@@ -78,7 +78,7 @@ async def get_debtor(message):
 
 async def get_pattern_is_register(message):
     pattern = await get_debtor(message)
-    pattern += r"\s*-?[0-9]+円\s*.*"
+    pattern += r"\s*-?[0-9]+円(?:\s+.*|$)"
     return pattern
 
 
