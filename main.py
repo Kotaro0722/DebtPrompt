@@ -203,35 +203,6 @@ async def on_message(message: discord.Message):
     else:
         await message.channel.send("不正な入力です")
 
-    pattern_is_summon = f"<@{client.user.id}>"
-    is_summon = re.match(pattern_is_summon, message.content)
-    if is_summon:
-        pattern_is_debtor = pattern_is_summon+r"\s*"+await get_debtor(message)
-        is_debtor = re.fullmatch(pattern_is_debtor, message.content)
-
-        is_all_debt = re.fullmatch(pattern_is_summon, message.content)
-
-        pattern_is_scroll = f"<@{client.user.id}>"+r"\s*"+"scroll"
-        is_scroll = re.fullmatch(pattern_is_scroll, message.content)
-
-        pattern_is_delete=f"<@{client.user.id}>"+r"\s*"+"delete"
-        is_delete=re.fullmatch(pattern_is_delete, message.content)
-
-        if is_all_debt:
-            await show_all_credit(message.author.id, message)
-
-        elif is_debtor:
-            debtor = re.findall(r"[0-9]+", message.content)[1]
-
-        elif is_scroll:
-            register_channel = client.get_channel(int(register_channel_id))
-            await scroll_message(register_channel)
-
-        elif is_delete:
-            register_channel = client.get_channel(int(register_channel_id))
-
-        else:
-            await message.channel.send("不正な入力です")
 
     pattern_is_register = await get_pattern_is_register(message)
     is_register = re.fullmatch(pattern_is_register, message.content)
