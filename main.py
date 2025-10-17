@@ -196,9 +196,12 @@ async def on_message(message: discord.Message):
         register_channel = client.get_channel(int(register_channel_id))
         await scroll_message(register_channel)
 
-    elif re.fullmatch(fr"<@{client.user.id}>\s*delete"):
+    elif re.fullmatch(fr"<@{client.user.id}>\s*delete",message.content):
         register_channel = client.get_channel(int(register_channel_id))
         await delete_circle(register_channel)
+
+    else:
+        await message.channel.send("不正な入力です")
 
     pattern_is_summon = f"<@{client.user.id}>"
     is_summon = re.match(pattern_is_summon, message.content)
