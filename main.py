@@ -130,11 +130,12 @@ async def scroll_message(channel: discord.Thread):
             await message.add_reaction("⭕")
 
 # 合計された債権の詳細を確認する
-async def show_detail(message_id: discord.Message, channel):
-    sql_string = f"SELECT * FROM total WHERE message_id={message_id}"
+async def show_detail(message: discord.Message,debtor, channel,payload):
+    sql_string = f"SELECT * FROM total WHERE message_id={message.id}"
     data = my_select(sql_string)
+
     for i in range(len(data)):
-        await channel.send(f"[その{i+1}](<https://discord.com/channels/963060474646257675/1098819625346682981/{data.at[i,'debt_id']}>)")
+        await channel.send(f"[{debtor.display_name}:その{i+1}](<https://discord.com/channels/{payload.guild_id}/{payload.channel_id}/{data.at[i,'debt_id']}>)")
 
 # DBに取り込んだ証である⭕リアクションを消す
 async def delete_circle(channel: discord.Thread):
@@ -245,6 +246,7 @@ async def on_raw_message_delete(payload:discord.RawMessageDeleteEvent):
 # ユーザがリアクションを付けたときに呼ばれる
 @client.event
 async def on_raw_reaction_add(payload: discord.RawReactionActionEvent):
+    guild=await client.fetch_guild(payload.guild_id)
     txt_channel = client.get_channel(payload.channel_id)
     message = await txt_channel.fetch_message(payload.message_id)
     user = payload.user_id
@@ -267,7 +269,8 @@ async def on_raw_reaction_add(payload: discord.RawReactionActionEvent):
             pay_one_debt(message.id)
 
     if payload.emoji.name == "❔" and client.user.id == message.author.id:
-        await show_detail(payload.message_id, txt_channel)
+        debtor=await guild.fetch_member(re.match(r"<@(\d+)>",message.content).group(1))
+        await show_detail(message,debtor, txt_channel,payload)
 
 # ユーザがリアクションを消したときに呼ばれる
 @client.event
