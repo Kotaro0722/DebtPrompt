@@ -27,6 +27,9 @@ def register_to_DB(id, creditor, debtor, amount, ispay):
     sql_insert_data = f"INSERT INTO {main_table}(id,creditor,debtor,amount,ispay) values({id},'{creditor}','{debtor}','{amount}',{ispay})"
     my_update(sql_insert_data)
 
+def update_DB(id,creditor,debtor,amount,ispay):
+    sql_update_data=f"INSERT INTO {main_table} (id,creditor,debtor,amount,ispay) VALUES ({id},'{creditor}','{debtor}',{amount},{ispay}) ON DUPLICATE KEY UPDATE debtor=VALUES(debtor), amount=VALUES(amount), ispay=VALUES(ispay);"
+    my_update(sql_update_data)
 
 async def show_all_credit(creditor, message):
     sql_string = f"SELECT debtor,amount FROM {main_table} WHERE creditor={creditor} AND ispay=0"
@@ -218,6 +221,28 @@ async def on_message(message: discord.Message):
 
         register_to_DB(id, creditor, debtor, amount, 0)
         await message.add_reaction("⭕")
+
+@client.event
+async def on_raw_message_edit(payload:discord.RawMessageUpdateEvent):
+    guild=await client.fetch_guild(payload.guild_id)
+    channel=await guild.fetch_channel(payload.channel_id)
+    message=await channel.fetch_message(payload.data["id"])
+    author=payload.data["author"]["id"]
+    if author==client.user:
+        return
+
+    message_content=message.content
+
+    pattern_is_update=await get_pattern_is_register(message)
+    is_update=re.fullmatch(pattern_is_update,message_content)
+    if is_update:
+        id=message.id
+        creditor=author
+        debtor,amount=re.match(r"<@(\d+)>\s+(\d+)円",message_content).groups()
+        ispay=any(reaction.emoji=="✅" for reaction in message.reactions)
+        print(id,creditor,debtor,amount,ispay,message.reactions)
+        update_DB(id,creditor,debtor,amount,ispay)
+
 
 
 @client.event
