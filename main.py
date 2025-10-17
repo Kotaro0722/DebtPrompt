@@ -179,9 +179,12 @@ async def on_message(message: discord.Message):
         return
 
     is_all_debt=re.fullmatch(f"<@{client.user.id}>",message.content)
+
+    # 自分に債権がある借金を全て表示
     if is_all_debt:
         await show_all_credit(message.author.id,message)
 
+    # 自分に債権がある借金のうち指定された債務者の分を表示
     elif re.fullmatch(fr"<@{client.user.id}>\s*(?:<@(\d+)>\s*)+",message.content):
         ids=re.findall(r"<@(\d+)>",message.content)
         ids.remove(str(client.user.id))
@@ -192,14 +195,17 @@ async def on_message(message: discord.Message):
             for id in ids:
                 await show_one_credit(message.author.id, id, message)
 
+    # 履歴の読み取り
     elif re.fullmatch(fr"<@{client.user.id}>\s*scroll",message.content):
         register_channel = client.get_channel(int(register_channel_id))
         await scroll_message(register_channel)
 
+    # ⭕リアクションの削除
     elif re.fullmatch(fr"<@{client.user.id}>\s*delete",message.content):
         register_channel = client.get_channel(int(register_channel_id))
         await delete_circle(register_channel)
 
+    # 間違ったコマンドへのメッセージ
     else:
         await message.channel.send("不正な入力です")
 
