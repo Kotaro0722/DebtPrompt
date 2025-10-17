@@ -23,7 +23,7 @@ main_table = config.MAIN_TABLE
 register_channel_id = config.REGISTER_CHANNEL_ID
 
 
-def register_to_DB(id, creditor, debtor, amount, ispay):
+def register_DB(id, creditor, debtor, amount, ispay):
     sql_insert_data = f"INSERT INTO {main_table}(id,creditor,debtor,amount,ispay) values({id},'{creditor}','{debtor}','{amount}',{ispay})"
     my_update(sql_insert_data)
 
@@ -133,7 +133,7 @@ async def scroll_message(channel: discord.Thread):
                 pattern_debtor_id = "[0-9]+"
                 debtor = re.findall(pattern_debtor_id, message.content)[0]
                 amount = re.findall(pattern_debtor_id, message.content)[1]
-                register_to_DB(message.id, message.author.id,
+                register_DB(message.id, message.author.id,
                              debtor, amount, is_pay)
             await message.add_reaction("⭕")
 
@@ -223,7 +223,7 @@ async def on_message(message: discord.Message):
 
         id = message.id
 
-        register_to_DB(id, creditor, debtor, amount, 0)
+        register_DB(id, creditor, debtor, amount, 0)
         await message.add_reaction("⭕")
 
 @client.event
