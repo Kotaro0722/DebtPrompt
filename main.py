@@ -66,13 +66,13 @@ def create_total(message_id, debt_ids):
         my_update(sql_string)
 
 
-def get_member_list(message):
-    members = message.guild.members
-    memberList = [member.id for member in members.values() if not member.bot]
+async def get_member_list(message,guild=None):
+    members = message.guild.members if not guild else  [member async for member in guild.fetch_members()]
+    memberList = [member.id for member in members if not member.bot]
     return memberList
 
-def get_register_pattern(message):
-    ids=get_member_list(message)
+async def get_register_pattern(message,guild=None):
+    ids=await get_member_list(message,guild)
     pattern = r"(?:"+"|".join(re.escape(f"<@{id}>") for id in ids)+r")\s*-?[0-9]+円(?:\s+.*|$)"
     return pattern
 
@@ -107,7 +107,7 @@ async def cancel_all_pay_debt(message_id, channel):
 
 async def scroll_message(channel: discord.Thread):
     async for message in channel.history(oldest_first=True, limit=None):
-        pattern_for_register = get_pattern_is_register(message)
+        pattern_for_register = await get_register_pattern(message)
         for_register = re.fullmatch(pattern_for_register, message.content)
         if not message.author.bot and for_register:
             is_register = False
@@ -198,7 +198,7 @@ async def on_message(message: discord.Message):
         await message.add_reaction("🤖")
         await message.add_reaction("❌")
 
-    elif re.fullmatch(get_pattern_is_register(message), message.content):
+    elif re.fullmatch(await get_register_pattern(message), message.content):
         id=message.id
         creditor=message.author.id
         debtor,amount=re.match(r"<@(\d+)>\s+(\d+)円",message.content).groups()
@@ -207,16 +207,17 @@ async def on_message(message: discord.Message):
 
 @client.event
 async def on_raw_message_edit(payload:discord.RawMessageUpdateEvent):
-    guild=await client.fetch_guild(payload.guild_id)
-    channel=await guild.fetch_channel(payload.channel_id)
-    message=await channel.fetch_message(payload.data["id"])
     author=payload.data["author"]["id"]
     if author==client.user:
         return
 
+    guild=await client.fetch_guild(payload.guild_id)
+    channel=await guild.fetch_channel(payload.channel_id)
+    message=await channel.fetch_message(payload.data["id"])
+
     message.content=message.content
 
-    pattern_is_update = get_pattern_is_register(message)
+    pattern_is_update = await get_register_pattern(message,guild)
     is_update=re.fullmatch(pattern_is_update,message.content)
     if is_update:
         id=message.id
