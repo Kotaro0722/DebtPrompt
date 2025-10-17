@@ -240,7 +240,6 @@ async def on_raw_message_edit(payload:discord.RawMessageUpdateEvent):
         creditor=author
         debtor,amount=re.match(r"<@(\d+)>\s+(\d+)円",message_content).groups()
         ispay=any(reaction.emoji=="✅" for reaction in message.reactions)
-        print(id,creditor,debtor,amount,ispay,message.reactions)
         update_DB(id,creditor,debtor,amount,ispay)
 
 
