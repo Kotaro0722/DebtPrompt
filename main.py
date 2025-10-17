@@ -67,25 +67,13 @@ def create_total(message_id, debt_ids):
 
 
 def get_member_list(message):
-    guild = client.get_guild(message.guild.id)
-    members = guild._members
+    members = message.guild.members
     memberList = [member.id for member in members.values() if not member.bot]
     return memberList
 
-
-def get_debtor(message):
-    list_party = get_member_list(message)
-    pattern = "("
-    for id in list_party:
-        pattern += f"<@{id}>|"
-    pattern = pattern.rstrip("|")
-    pattern += ")"
-    return pattern
-
-
-def get_pattern_is_register(message):
-    pattern = get_debtor(message)
-    pattern += r"\s*-?[0-9]+円(?:\s+.*|$)"
+def get_register_pattern(message):
+    ids=get_member_list(message)
+    pattern = r"(?:"+"|".join(re.escape(f"<@{id}>") for id in ids)+r")\s*-?[0-9]+円(?:\s+.*|$)"
     return pattern
 
 
