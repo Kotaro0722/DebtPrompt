@@ -182,7 +182,7 @@ async def on_message(message: discord.Message):
     if is_all_debt:
         await show_all_credit(message.author.id,message)
 
-    if re.fullmatch(fr"<@{client.user.id}>\s*(?:<@(\d+)>\s*)+",message.content):
+    elif re.fullmatch(fr"<@{client.user.id}>\s*(?:<@(\d+)>\s*)+",message.content):
         ids=re.findall(r"<@(\d+)>",message.content)
         ids.remove(str(client.user.id))
 
@@ -192,6 +192,13 @@ async def on_message(message: discord.Message):
             for id in ids:
                 await show_one_credit(message.author.id, id, message)
 
+    elif re.fullmatch(fr"<@{client.user.id}>\s*scroll",message.content):
+        register_channel = client.get_channel(int(register_channel_id))
+        await scroll_message(register_channel)
+
+    elif re.fullmatch(fr"<@{client.user.id}>\s*delete"):
+        register_channel = client.get_channel(int(register_channel_id))
+        await delete_circle(register_channel)
 
     pattern_is_summon = f"<@{client.user.id}>"
     is_summon = re.match(pattern_is_summon, message.content)
