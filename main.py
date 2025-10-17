@@ -73,8 +73,8 @@ def get_member_list(message):
     return memberList
 
 
-async def get_debtor(message):
-    list_party = await get_member_list(message)
+def get_debtor(message):
+    list_party = get_member_list(message)
     pattern = "("
     for id in list_party:
         pattern += f"<@{id}>|"
@@ -83,8 +83,8 @@ async def get_debtor(message):
     return pattern
 
 
-async def get_pattern_is_register(message):
-    pattern = await get_debtor(message)
+def get_pattern_is_register(message):
+    pattern = get_debtor(message)
     pattern += r"\s*-?[0-9]+円(?:\s+.*|$)"
     return pattern
 
@@ -119,7 +119,7 @@ async def cancel_all_pay_debt(message_id, channel):
 
 async def scroll_message(channel: discord.Thread):
     async for message in channel.history(oldest_first=True, limit=None):
-        pattern_for_register = await get_pattern_is_register(message)
+        pattern_for_register = get_pattern_is_register(message)
         for_register = re.fullmatch(pattern_for_register, message.content)
         if not message.author.bot and for_register:
             is_register = False
@@ -204,7 +204,7 @@ async def on_message(message: discord.Message):
         await message.channel.send("不正な入力です")
 
 
-    pattern_is_register = await get_pattern_is_register(message)
+    pattern_is_register = get_pattern_is_register(message)
     is_register = re.fullmatch(pattern_is_register, message.content)
     if is_register:
         pattern_debtor_id = "-?[0-9]+"
@@ -231,7 +231,7 @@ async def on_raw_message_edit(payload:discord.RawMessageUpdateEvent):
 
     message.content=message.content
 
-    pattern_is_update=await get_pattern_is_register(message)
+    pattern_is_update = get_pattern_is_register(message)
     is_update=re.fullmatch(pattern_is_update,message.content)
     if is_update:
         id=message.id
