@@ -66,7 +66,7 @@ def create_total(message_id, debt_ids):
         my_update(sql_string)
 
 
-async def get_member_list(message):
+def get_member_list(message):
     guild = client.get_guild(message.guild.id)
     members = guild._members
     memberList = [member.id for member in members.values() if not member.bot]
@@ -178,27 +178,30 @@ async def on_message(message: discord.Message):
     if message.author == client.user:
         return
 
-    message_content = message.content
+    is_all_debt=re.fullmatch(f"<@{client.user.id}>",message.content)
+    if is_all_debt:
+        await show_all_credit(message.author.id,message)
+
+
     pattern_is_summon = f"<@{client.user.id}>"
-    is_summon = re.match(pattern_is_summon, message_content)
+    is_summon = re.match(pattern_is_summon, message.content)
     if is_summon:
         pattern_is_debtor = pattern_is_summon+r"\s*"+await get_debtor(message)
-        is_debtor = re.fullmatch(pattern_is_debtor, message_content)
+        is_debtor = re.fullmatch(pattern_is_debtor, message.content)
 
-        is_all_debt = re.fullmatch(pattern_is_summon, message_content)
+        is_all_debt = re.fullmatch(pattern_is_summon, message.content)
 
         pattern_is_scroll = f"<@{client.user.id}>"+r"\s*"+"scroll"
-        is_scroll = re.fullmatch(pattern_is_scroll, message_content)
+        is_scroll = re.fullmatch(pattern_is_scroll, message.content)
 
         pattern_is_delete=f"<@{client.user.id}>"+r"\s*"+"delete"
-        is_delete=re.fullmatch(pattern_is_delete, message_content)
+        is_delete=re.fullmatch(pattern_is_delete, message.content)
 
         if is_all_debt:
             await show_all_credit(message.author.id, message)
 
         elif is_debtor:
-            debtor = re.findall(r"[0-9]+", message_content)[1]
-            await show_one_credit(message.author.id, debtor, message)
+            debtor = re.findall(r"[0-9]+", message.content)[1]
 
         elif is_scroll:
             register_channel = client.get_channel(int(register_channel_id))
@@ -211,15 +214,15 @@ async def on_message(message: discord.Message):
             await message.channel.send("不正な入力です")
 
     pattern_is_register = await get_pattern_is_register(message)
-    is_register = re.fullmatch(pattern_is_register, message_content)
+    is_register = re.fullmatch(pattern_is_register, message.content)
     if is_register:
         pattern_debtor_id = "-?[0-9]+"
-        debtor = re.findall(pattern_debtor_id, message_content)[0]
+        debtor = re.findall(pattern_debtor_id, message.content)[0]
 
         creditor = message.author.id
 
         pattern_amount = pattern_debtor_id
-        amount = re.findall(pattern_amount, message_content)[1]
+        amount = re.findall(pattern_amount, message.content)[1]
 
         id = message.id
 
@@ -235,14 +238,14 @@ async def on_raw_message_edit(payload:discord.RawMessageUpdateEvent):
     if author==client.user:
         return
 
-    message_content=message.content
+    message.content=message.content
 
     pattern_is_update=await get_pattern_is_register(message)
-    is_update=re.fullmatch(pattern_is_update,message_content)
+    is_update=re.fullmatch(pattern_is_update,message.content)
     if is_update:
         id=message.id
         creditor=author
-        debtor,amount=re.match(r"<@(\d+)>\s+(\d+)円",message_content).groups()
+        debtor,amount=re.match(r"<@(\d+)>\s+(\d+)円",message.content).groups()
         ispay=any(reaction.emoji=="✅" for reaction in message.reactions)
         update_DB(id,creditor,debtor,amount,ispay)
 
