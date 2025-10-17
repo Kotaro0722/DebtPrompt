@@ -206,23 +206,14 @@ async def on_message(message: discord.Message):
         await delete_circle(register_channel)
 
     # 間違ったコマンドへのメッセージ
-    else:
-        await message.channel.send("不正な入力です")
+    elif re.search(rf"<@{client.user.id}>",message.content):
+        await message.add_reaction("🤖")
+        await message.add_reaction("❌")
 
-
-    pattern_is_register = get_pattern_is_register(message)
-    is_register = re.fullmatch(pattern_is_register, message.content)
-    if is_register:
-        pattern_debtor_id = "-?[0-9]+"
-        debtor = re.findall(pattern_debtor_id, message.content)[0]
-
-        creditor = message.author.id
-
-        pattern_amount = pattern_debtor_id
-        amount = re.findall(pattern_amount, message.content)[1]
-
-        id = message.id
-
+    elif re.fullmatch(get_pattern_is_register(message), message.content):
+        id=message.id
+        creditor=message.author.id
+        debtor,amount=re.match(r"<@(\d+)>\s+(\d+)円",message.content).groups()
         register_DB(id, creditor, debtor, amount, 0)
         await message.add_reaction("⭕")
 
