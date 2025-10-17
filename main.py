@@ -22,19 +22,22 @@ main_table = config.MAIN_TABLE
 
 register_channel_id = config.REGISTER_CHANNEL_ID
 
-
+# DBへ登録する
 def register_DB(id, creditor, debtor, amount, ispay):
     sql_insert_data = f"INSERT INTO {main_table}(id,creditor,debtor,amount,ispay) values({id},'{creditor}','{debtor}','{amount}',{ispay})"
     my_update(sql_insert_data)
 
+# DBを更新する
 def update_DB(id,creditor,debtor,amount,ispay):
     sql_update_data=f"INSERT INTO {main_table} (id,creditor,debtor,amount,ispay) VALUES ({id},'{creditor}','{debtor}',{amount},{ispay}) ON DUPLICATE KEY UPDATE debtor=VALUES(debtor), amount=VALUES(amount), ispay=VALUES(ispay);"
     my_update(sql_update_data)
 
+# Dbから削除する
 def delete_DB(id):
     sql_delete_data=f"DELETE FROM {main_table} WHERE id={id};"
     my_update(sql_delete_data)
 
+# ある債権者の全ての債権を表示する
 async def show_all_credit(creditor, message):
     sql_string = f"SELECT debtor,amount FROM {main_table} WHERE creditor={creditor} AND ispay=0"
     data = my_select(sql_string)
@@ -47,7 +50,7 @@ async def show_all_credit(creditor, message):
         data = my_select(sql_string)
         create_total(message_send.id, data)
 
-
+# ある債権者のうち、一人分の債権を表示する
 async def show_one_credit(creditor, debtor, message):
     sql_string = f"SELECT amount FROM {main_table} WHERE creditor={creditor} AND debtor={debtor} AND ispay=0;"
     data = my_select(sql_string)
@@ -59,29 +62,30 @@ async def show_one_credit(creditor, debtor, message):
     data = my_select(sql_string)
     create_total(message_send.id, data)
 
-
+# 現時点でのある債権者の所有する債権を債務者ごとに合計する
 def create_total(message_id, debt_ids):
     for debt_id in debt_ids["id"].tolist():
         sql_string = f"INSERT INTO total (message_id,debt_id) VALUES ({message_id},{debt_id})"
         my_update(sql_string)
 
-
+# メッセージが送られたサーバーに存在するBot以外のユーザのリスト
 async def get_member_list(message,guild=None):
     members = message.guild.members if not guild else  [member async for member in guild.fetch_members()]
     memberList = [member.id for member in members if not member.bot]
     return memberList
 
+# 借金のフォーマットを作成する
 async def get_register_pattern(message,guild=None):
     ids=await get_member_list(message,guild)
     pattern = r"(?:"+"|".join(re.escape(f"<@{id}>") for id in ids)+r")\s*-?[0-9]+円(?:\s+.*|$)"
     return pattern
 
-
+# ある債権を回収する
 def pay_one_debt(message_id):
     sql_string = f"UPDATE {main_table} SET ispay=1 WHERE id={message_id}"
     my_update(sql_string)
 
-
+# ある債権者の所有する債権のうち、一人の債務者に関する債権を回数する
 async def pay_all_debt(message_id, channel):
     sql_string = f"SELECT * FROM total WHERE message_id={message_id}"
     data = my_select(sql_string)
@@ -90,12 +94,12 @@ async def pay_all_debt(message_id, channel):
         message = await channel.fetch_message(data.at[i, "debt_id"])
         await message.add_reaction("✅")
 
-
+# ある債権者が所有していて回収済みとなっていた一つの債権を復活する
 def cancel_one_pay_debt(message_id):
     sql_string = f"UPDATE {main_table} SET ispay=0 WHERE id={message_id}"
     my_update(sql_string)
 
-
+# ある債権者が所有していて回収済みとなっていた一人の債務者に対する債権を復活する
 async def cancel_all_pay_debt(message_id, channel):
     sql_string = f"SELECT * FROM total WHERE message_id={message_id}"
     data = my_select(sql_string)
@@ -104,7 +108,7 @@ async def cancel_all_pay_debt(message_id, channel):
         message = await channel.fetch_message(data.at[i, "debt_id"])
         await message.remove_reaction("✅", client.user)
 
-
+# Discordのチャンネル上に残された履歴をDBに取り込む
 async def scroll_message(channel: discord.Thread):
     async for message in channel.history(oldest_first=True, limit=None):
         pattern_for_register = await get_register_pattern(message)
@@ -125,14 +129,14 @@ async def scroll_message(channel: discord.Thread):
                              debtor, amount, is_pay)
             await message.add_reaction("⭕")
 
-
+# 合計された債権の詳細を確認する
 async def show_detail(message_id: discord.Message, channel):
     sql_string = f"SELECT * FROM total WHERE message_id={message_id}"
     data = my_select(sql_string)
     for i in range(len(data)):
         await channel.send(f"[その{i+1}](<https://discord.com/channels/963060474646257675/1098819625346682981/{data.at[i,'debt_id']}>)")
 
-
+# DBに取り込んだ証である⭕リアクションを消す
 async def delete_circle(channel: discord.Thread):
     async for message in channel.history(oldest_first=True, limit=None):
         try:
@@ -140,6 +144,7 @@ async def delete_circle(channel: discord.Thread):
         except Exception as e:
             print(e)
 
+# Botが起動した際に呼ばれる
 @client.event
 async def on_ready():
     print('We have logged in as {0.user}'.format(client))
@@ -161,6 +166,7 @@ async def on_ready():
     my_update(total_table_create_sql)
 
 
+# ユーザがメッセージを送信したときに呼ばれる
 @client.event
 async def on_message(message: discord.Message):
     if message.author == client.user:
@@ -205,6 +211,7 @@ async def on_message(message: discord.Message):
         register_DB(id, creditor, debtor, amount, 0)
         await message.add_reaction("⭕")
 
+# ユーザがメッセージを編集したときに呼ばれる
 @client.event
 async def on_raw_message_edit(payload:discord.RawMessageUpdateEvent):
     author=payload.data["author"]["id"]
@@ -230,10 +237,12 @@ async def on_raw_message_edit(payload:discord.RawMessageUpdateEvent):
         await message.remove_reaction("⭕",client.user)
 
 
+# ユーザがメッセージを削除したときに呼ばれる
 @client.event
 async def on_raw_message_delete(payload:discord.RawMessageDeleteEvent):
     delete_DB(payload.message_id)
 
+# ユーザがリアクションを付けたときに呼ばれる
 @client.event
 async def on_raw_reaction_add(payload: discord.RawReactionActionEvent):
     txt_channel = client.get_channel(payload.channel_id)
@@ -260,7 +269,7 @@ async def on_raw_reaction_add(payload: discord.RawReactionActionEvent):
     if payload.emoji.name == "❔" and client.user.id == message.author.id:
         await show_detail(payload.message_id, txt_channel)
 
-
+# ユーザがリアクションを消したときに呼ばれる
 @client.event
 async def on_raw_reaction_remove(payload):
     txt_channel = client.get_channel(payload.channel_id)
