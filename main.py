@@ -225,6 +225,10 @@ async def on_raw_message_edit(payload:discord.RawMessageUpdateEvent):
         debtor,amount=re.match(r"<@(\d+)>\s+(\d+)円",message.content).groups()
         ispay=any(reaction.emoji=="✅" for reaction in message.reactions)
         update_DB(id,creditor,debtor,amount,ispay)
+        await message.add_reaction("⭕")
+    else:
+        await message.remove_reaction("⭕",client.user)
+
 
 @client.event
 async def on_raw_message_delete(payload:discord.RawMessageDeleteEvent):
