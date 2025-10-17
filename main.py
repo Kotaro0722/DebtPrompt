@@ -182,6 +182,16 @@ async def on_message(message: discord.Message):
     if is_all_debt:
         await show_all_credit(message.author.id,message)
 
+    if re.fullmatch(fr"<@{client.user.id}>\s*(?:<@(\d+)>\s*)+",message.content):
+        ids=re.findall(r"<@(\d+)>",message.content)
+        ids.remove(str(client.user.id))
+
+        channel_member= get_member_list(message)
+        is_only_user=all(int(id) in channel_member for id in ids)
+        if is_only_user:
+            for id in ids:
+                await show_one_credit(message.author.id, id, message)
+
 
     pattern_is_summon = f"<@{client.user.id}>"
     is_summon = re.match(pattern_is_summon, message.content)
