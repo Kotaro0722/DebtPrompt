@@ -135,7 +135,7 @@ async def show_detail(message: discord.Message,debtor, channel,payload):
     data = my_select(sql_string)
 
     for i in range(len(data)):
-        await channel.send(f"[{debtor.display_name}:その{i+1}](<https://discord.com/channels/{payload.guild_id}/{payload.channel_id}/{data.at[i,'debt_id']}>)")
+        await channel.send(f"[{debtor.display_name}:その{i+1}](<https://discord.com/channels/{payload.guild_id}/{register_channel_id}/{data.at[i,'debt_id']}>)")
 
 # DBに取り込んだ証である⭕リアクションを消す
 async def delete_circle(channel: discord.Thread):
