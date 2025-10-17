@@ -31,6 +31,10 @@ def update_DB(id,creditor,debtor,amount,ispay):
     sql_update_data=f"INSERT INTO {main_table} (id,creditor,debtor,amount,ispay) VALUES ({id},'{creditor}','{debtor}',{amount},{ispay}) ON DUPLICATE KEY UPDATE debtor=VALUES(debtor), amount=VALUES(amount), ispay=VALUES(ispay);"
     my_update(sql_update_data)
 
+def delete_DB(id):
+    sql_delete_data=f"DELETE FROM {main_table} WHERE id={id};"
+    my_update(sql_delete_data)
+
 async def show_all_credit(creditor, message):
     sql_string = f"SELECT debtor,amount FROM {main_table} WHERE creditor={creditor} AND ispay=0"
     data = my_select(sql_string)
@@ -242,7 +246,9 @@ async def on_raw_message_edit(payload:discord.RawMessageUpdateEvent):
         ispay=any(reaction.emoji=="✅" for reaction in message.reactions)
         update_DB(id,creditor,debtor,amount,ispay)
 
-
+@client.event
+async def on_raw_message_delete(payload:discord.RawMessageDeleteEvent):
+    delete_DB(payload.message_id)
 
 @client.event
 async def on_raw_reaction_add(payload: discord.RawReactionActionEvent):
