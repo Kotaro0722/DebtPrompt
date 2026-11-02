@@ -15,6 +15,11 @@ async def get_register_pattern(message,guild=None):
     pattern = r"(?:"+"|".join(re.escape(f"<@{id}>") for id in ids)+r")\s*-?[0-9]+円(?:\s+.*|$)"
     return pattern
 
+# 借金登録メッセージから債務者IDと金額を取り出す(金額はマイナスなら一部返済として扱う)
+def parse_register_message(content):
+    debtor, amount = re.match(r"<@(\d+)>\s*(-?[0-9]+)円", content).groups()
+    return debtor, int(amount)
+
 # Discordのチャンネル上に残された履歴をDBに取り込む
 async def scroll_message(channel: discord.Thread):
     async for message in channel.history(oldest_first=True, limit=None):
@@ -29,9 +34,7 @@ async def scroll_message(channel: discord.Thread):
                 if reaction.emoji == "✅":
                     is_pay = 1
             if not is_register:
-                pattern_debtor_id = "[0-9]+"
-                debtor = re.findall(pattern_debtor_id, message.content)[0]
-                amount = re.findall(pattern_debtor_id, message.content)[1]
+                debtor, amount = parse_register_message(message.content)
                 main_db.register_DB(message.id, message.author.id,
                              debtor, amount, is_pay)
             await message.add_reaction("⭕")

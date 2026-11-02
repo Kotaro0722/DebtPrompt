@@ -6,7 +6,7 @@ from main_db import register_DB, update_DB, delete_DB
 from bot_client import client
 from main_credit import show_all_credit, show_one_credit, show_detail
 from main_pay import pay_one_debt, pay_all_debt, cancel_one_pay_debt, cancel_all_pay_debt
-from main_message import get_member_list, get_register_pattern, scroll_message, delete_circle
+from main_message import get_member_list, get_register_pattern, parse_register_message, scroll_message, delete_circle
 
 
 Token = config.TOKEN
@@ -80,7 +80,7 @@ async def on_message(message: discord.Message):
     elif re.fullmatch(await get_register_pattern(message), message.content):
         id=message.id
         creditor=message.author.id
-        debtor,amount=re.match(r"<@(\d+)>\s+(\d+)円",message.content).groups()
+        debtor,amount=parse_register_message(message.content)
         register_DB(id, creditor, debtor, amount, 0)
         await message.add_reaction("⭕")
 
@@ -102,7 +102,7 @@ async def on_raw_message_edit(payload:discord.RawMessageUpdateEvent):
     if is_update:
         id=message.id
         creditor=author
-        debtor,amount=re.match(r"<@(\d+)>\s+(\d+)円",message.content).groups()
+        debtor,amount=parse_register_message(message.content)
         ispay=any(reaction.emoji=="✅" for reaction in message.reactions)
         update_DB(id,creditor,debtor,amount,ispay)
         await message.add_reaction("⭕")
