@@ -1,12 +1,12 @@
 import mysql.connector as mydb
-from db.db_pool import connection_pool
+from db.db_pool import get_connection_pool
 import pandas as pd
 import sys
 
 
 def my_select(sql_string):
     try:
-        dbcon=connection_pool.get_connection()
+        dbcon=get_connection_pool().get_connection()
         cursor = dbcon.cursor(dictionary=True)
     except mydb.Error as e:
         print(f"DBコネクションでエラー発生\n{e}")
